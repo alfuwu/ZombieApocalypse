@@ -1,0 +1,79 @@
+PlayerZombified: "{0} has become a zombie!"
+PlayerZombifiedInfection: "{0} has become a zombie!"
+PlayerUnzombified: "{0} has returned to the living."
+
+Configs: {
+	ZombieApocalypseConfig: {
+		DisplayName: Config
+
+		OnlyTransformPlayerIfKilledByZombie: {
+			Label: Only Transform Player if Killed by Zombie
+			Tooltip: The player will die as normal if they aren't killed by a zombie
+		}
+
+		DropUnusableItemsOnDeath: {
+			Label: Drop Unusable Items on Death
+			Tooltip: Makes the player drop any unusable items in their inventory when they get transformed into a zombie
+		}
+
+		BroadcastZombificationText: {
+			Label: Broadcast Zombification Message
+			Tooltip: Broadcasts a message to all players when a player gets zombified
+		}
+
+		BroadcastUnzombificationText: {
+			Label: Broadcast Unzombification Message
+			Tooltip: Broadcasts a message to all players when a player gets unzombified
+		}
+
+		UnzombifyPlayersOnDeath: {
+			Label: Unzombify Players Upon Death
+			Tooltip: Returns a player back to the living if they die while zombified
+		}
+
+		DropUnusableItemsOnZombification: {
+			Label: Drop Unusable Items Upon Zombification
+			Tooltip: Drops all items in unusable slots when a player gets zombified
+		}
+
+		ZombiesCanTradeWithNPCs: {
+			Label: Zombies Can Trade With NPCs
+			Tooltip: Allows zombified players to trade with NPCs
+		}
+
+		HostileNPCsAreMostlyFriendlyToZombies: {
+			Label: Hostile NPCs Are Mostly Friendly to Zombies
+			Tooltip: Prevents zombified players from hitting normally hostile NPCs unless they're actively being targeted by the NPC, and makes the NPCs prefer any other player over a zombified player
+		}
+
+		ZombiesHaveADifferentSkinColor: {
+			Label: Zombies Have a Different Skin Color
+			Tooltip: Zombified players will have their skin color automatically changed to the skin color below
+		}
+
+		ZombieSkinColor: {
+			Label: Zombie Skin Color
+			Tooltip: The skin color of zombies, if Zombies Have a Different Skin Color is enabled
+		}
+
+		ZombiesCanFightOtherPlayersWithoutPvP: {
+			Label: Zombies Can Fight Other Players Without PvP
+			Tooltip: Allows zombies to fight other players without PvP enabled, and vice-versa
+		}
+
+		ZombieSpawnChanceMult: {
+			Label: Zombie Spawn Multiplier
+			Tooltip: Multiplies the frequency and chance for zombies to spawn
+		}
+
+		InitialInfectionPlayers: {
+			Label: Initial Infection Players
+			Tooltip: ""
+		}
+
+		BroadcastInfectionPlayers: {
+			Label: Broadcast Infection Players
+			Tooltip: ""
+		}
+	}
+}
