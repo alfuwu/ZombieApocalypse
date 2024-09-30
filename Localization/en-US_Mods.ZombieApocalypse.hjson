@@ -81,19 +81,41 @@ Configs: {
 			Tooltip: Allows zombies to use coin and ammo slots
 		}
 
-		AllowZombiesToUseVoidbag: {
+		AllowZombiesToUseVoidbags: {
 			Label: Allow Zombies to Use Voidbag
 			Tooltip: The voidbag is basically an extra inventory, so you may want to turn off the option for a zombie to use one
 		}
 
-		AllowZombiesToUseVoidbags: {
-			Label: Allow Zombies To Use Voidbags
-			Tooltip: ""
+		ZombiesGetWeaknessWhenExposedToSun: {
+			Label: Zombies Get Weakness When Exposed to Sun
+			Tooltip: Zombified players will become weak when in sunlight
 		}
 
-		ZombiesGetWeaknessWhenExposedToSun: {
-			Label: Zombies Get Weakness When Exposed To Sun
-			Tooltip: ""
+		EnableHolyCure: {
+			Label: Enable Holy Cure
+			Tooltip: Enables usage & crafting of Holy Cures
 		}
+
+		EnableSuspiciousLookingFlask: {
+			Label: Enable Suspicious Looking Flask
+			Tooltip: Enables usage & crafting of Suspicious Looking Flasks
+		}
+
+		IncreaseZombieArmDropChance: {
+			Label: Increase Zombie Arm Drop Chance
+			Tooltip: Increases the chance for zombies to drop their arms
+		}
+	}
+}
+
+Items: {
+	HolyCure: {
+		DisplayName: Holy Cure
+		Tooltip: "'Works 100% of the time 99% of the time!' - Zonbi McSaumbieton"
+	}
+
+	SuspiciousLookingFlask: {
+		DisplayName: Suspicious Looking Flask
+		Tooltip: "'There's a message on the front mentioning something about monsters...' "
 	}
 }

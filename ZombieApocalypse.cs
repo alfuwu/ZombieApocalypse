@@ -95,6 +95,23 @@ namespace ZombieApocalypse {
         [DefaultValue(true)]
         public bool ZombiesGetWeaknessWhenExposedToSun { get; set; }
 
+        [DefaultValue(true)]
+        public bool EnableHolyCure { get; set; }
+
+        [DefaultValue(true)]
+        public bool EnableSuspiciousLookingFlask { get; set; }
+
+        [DefaultValue(true)]
+        [ReloadRequired]
+        public bool IncreaseZombieArmDropChance { get; set; }
+
+        [DefaultValue(true)]
+        public bool MoreZomb { get; set; }
+
+        [DefaultValue(true)]
+        [ReloadRequired]
+        public bool StrongerZomb { get; set; }
+
         public static ZombieApocalypseConfig GetInstance() => ModContent.GetInstance<ZombieApocalypseConfig>();
 
         public static ZombieApocalypseConfig GetInstance(out ZombieApocalypseConfig config) {
