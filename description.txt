@@ -2,7 +2,8 @@ This mod adds zombie apocalypse mechanics to Terraria. You may choose whether or
 
 By default, a player will become a zombie if they're killed by anything.
 
-As a zombie, you may only use the items in the first four slots of your hotbar, along with the first three accesory slots, armor slots, and misc slots. You are not able to use the ammo/coin slots either. You will, by default, drop all of the items your are unable to use upon death, however you can disable this behavior in the config.
+As a zombie, you may only use the items in the first five slots of your hotbar, along with the first two accessory slots (three if on master mode, and four if on expert or higher after consuming a Demon Heart), all armor slots, and all misc slots. You are not able to use the ammo/coin slots either, unless enabled in the config.
+You will, by default, drop all of the items your are unable to use upon zombification, however you can disable this behavior in the config.
 You can also damage players, regardless of PvP status.
 
 This mod also ramps up zombie spawns :)

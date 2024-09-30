@@ -85,6 +85,16 @@ namespace ZombieApocalypse {
         [DefaultValue(false)]
         public bool BroadcastInfectionPlayers { get; set; }
 
+        [DefaultValue(false)]
+        [ReloadRequired]
+        public bool ZombiesCanUseAmmoAndCoinSlots { get; set; }
+
+        [DefaultValue(true)]
+        public bool AllowZombiesToUseVoidbags { get; set; }
+
+        [DefaultValue(true)]
+        public bool ZombiesGetWeaknessWhenExposedToSun { get; set; }
+
         public static ZombieApocalypseConfig GetInstance() => ModContent.GetInstance<ZombieApocalypseConfig>();
 
         public static ZombieApocalypseConfig GetInstance(out ZombieApocalypseConfig config) {

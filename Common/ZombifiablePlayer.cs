@@ -12,7 +12,16 @@ namespace ZombieApocalypse.Common;
 
 public class ZombifiablePlayer : ModPlayer {
     public bool Zombified { get; set; } = false;
-    public Color OriginalSkinColor { get; set; }
+    public Color OriginalSkinColor { get; set; } // hacky skin color solution
+
+    public static bool ExposedToSky(Player player, bool affectedByWind = false) {
+        Point playerTileCoordinate = player.Center.ToTileCoordinates();
+        Vector2 headPosition = player.position - new Vector2(0f, player.height);
+
+        bool canHitSky = Collision.CanHit(new Vector2(headPosition.X + player.width / 2, headPosition.Y), 1, 1, new Vector2(Main.screenPosition.X + (Main.screenWidth / 2) + (affectedByWind ? -Main.screenWidth * Main.windSpeedCurrent * (MathHelper.Pi / 10) : 0), Main.screenPosition.Y), 1, 1); // holy fuck why did i make this
+
+        return !(playerTileCoordinate.Y <= 50 && playerTileCoordinate.Y > Main.rockLayer) && canHitSky;
+    }
 
     public override bool CanBeHitByNPC(NPC npc, ref int cooldownSlot) => !ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies || !Zombified || npc.target == Player.whoAmI;
 
@@ -38,10 +47,9 @@ public class ZombifiablePlayer : ModPlayer {
     public override bool CanHitNPC(NPC target) =>  !ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies || !Zombified || (Zombified && target.friendly) || target.target == Player.whoAmI;
 
     public override void SaveData(TagCompound tag) {
-        if (Zombified) {
+        tag["SkinColor"] = OriginalSkinColor;
+        if (Zombified)
             tag["Zombified"] = true;
-            tag["SkinColor"] = OriginalSkinColor;
-        }
     }
 
     public override void LoadData(TagCompound tag) {
@@ -52,6 +60,8 @@ public class ZombifiablePlayer : ModPlayer {
     }
 
     public void ClientHandleZombification(bool fromInfection = false) {
+        if (OriginalSkinColor == new Color(0, 0, 0) && Zombified) // simple double check if the player's skin color is pure black as insurance
+            OriginalSkinColor = Player.skinColor;
         if ((ZombieApocalypseConfig.GetInstance(out var cfg).BroadcastZombificationText && Zombified) || cfg.BroadcastUnzombificationText)
             Main.NewText(Language.GetTextValue($"{ZombieApocalypse.Localization}.Player{(Zombified ? "Zombified" : "Unzombified")}", Player.name), 50, 255, 130);
         if (Main.netMode == NetmodeID.MultiplayerClient)
@@ -65,13 +75,22 @@ public class ZombifiablePlayer : ModPlayer {
     }
 
     public override void PostUpdate() { // huh, terraria doesn't like negative 100k aggro apparently
-        if (Zombified && ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies)
-            Player.aggro = -100000;
+        if (Zombified) {
+            if (ZombieApocalypseConfig.GetInstance(out var cfg).HostileNPCsAreMostlyFriendlyToZombies)
+                Player.aggro = -100000;
+            if (cfg.ZombiesGetWeaknessWhenExposedToSun && Main.IsItDay() && ExposedToSky(Player) && !Player.buffImmune[BuffID.Weak])
+                if (Player.HasBuff(BuffID.Weak) && Player.buffTime[Player.FindBuffIndex(BuffID.Weak)] <= 301)
+                    Player.buffTime[Player.FindBuffIndex(BuffID.Weak)] = 302;
+                else if (!Player.HasBuff(BuffID.Weak))
+                    Player.AddBuff(BuffID.Weak, 302);
+        }
     }
+
+    public override bool CanSellItem(NPC vendor, Item[] shopInventory, Item item) => ZombieApocalypseConfig.GetInstance().ZombiesCanTradeWithNPCs;
 
     public override bool CanBuyItem(NPC vendor, Item[] shopInventory, Item item) => ZombieApocalypseConfig.GetInstance().ZombiesCanTradeWithNPCs;
 
-    /*public override void CopyClientState(ModPlayer targetCopy) {
+    public override void CopyClientState(ModPlayer targetCopy) {
         if (targetCopy is ZombifiablePlayer zombi) {
             zombi.Zombified = Zombified;
             zombi.OriginalSkinColor = OriginalSkinColor;
@@ -79,8 +98,11 @@ public class ZombifiablePlayer : ModPlayer {
     }
 
     public override void SendClientChanges(ModPlayer clientPlayer) {
-        
-    }*/
+        if (clientPlayer is ZombifiablePlayer zombi) {
+            zombi.Zombified = Zombified;
+            zombi.OriginalSkinColor = OriginalSkinColor;
+        }
+    }
 
     public static void HandleZombification(BinaryReader reader, int whoAmI) {
         int player = reader.ReadByte();

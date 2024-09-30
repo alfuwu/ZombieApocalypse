@@ -68,11 +68,31 @@ Configs: {
 
 		InitialInfectionPlayers: {
 			Label: Initial Infection Players
-			Tooltip: ""
+			Tooltip: The amount of players to infect when using the /infection command
 		}
 
 		BroadcastInfectionPlayers: {
 			Label: Broadcast Infection Players
+			Tooltip: Broadcasts a message to all player what players were chosen to be infected for the /infection game
+		}
+
+		ZombiesCanUseAmmoAndCoinSlots: {
+			Label: Zombies Can Use Ammo And Coin Slots
+			Tooltip: Allows zombies to use coin and ammo slots
+		}
+
+		AllowZombiesToUseVoidbag: {
+			Label: Allow Zombies to Use Voidbag
+			Tooltip: The voidbag is basically an extra inventory, so you may want to turn off the option for a zombie to use one
+		}
+
+		AllowZombiesToUseVoidbags: {
+			Label: Allow Zombies To Use Voidbags
+			Tooltip: ""
+		}
+
+		ZombiesGetWeaknessWhenExposedToSun: {
+			Label: Zombies Get Weakness When Exposed To Sun
 			Tooltip: ""
 		}
 	}
