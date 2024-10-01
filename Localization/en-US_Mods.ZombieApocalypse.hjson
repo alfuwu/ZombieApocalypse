@@ -105,6 +105,31 @@ Configs: {
 			Label: Increase Zombie Arm Drop Chance
 			Tooltip: Increases the chance for zombies to drop their arms
 		}
+
+		MoreZomb: {
+			Label: More Zomb
+			Tooltip: Makes every zombie spawn 2-4x more
+		}
+
+		StrongerZomb: {
+			Label: Stronger Zomb
+			Tooltip: Increases all general stats of every zombie NPC
+		}
+
+		EvenMoreZomb: {
+			Label: Even More Zomb
+			Tooltip: Adds more zombie NPCs to the game, so that they don't become irrelevant late-game
+		}
+
+		ZombiesHaveSmallerInventories: {
+			Label: Zombies Have Smaller Inventories
+			Tooltip: Makes zombies only able to access the first five slots of their hotbar, instead of their entire inventory
+		}
+
+		ZombiesHaveLessAccessories: {
+			Label: Zombies Have Less Accessories
+			Tooltip: Makes zombies only able to access the first two accessory slots (3 after consuming a Demon Heart, and 4 on master mode after consuming a Demon Heart)
+		}
 	}
 }
 
@@ -118,4 +143,41 @@ Items: {
 		DisplayName: Suspicious Looking Flask
 		Tooltip: "'There's a message on the front mentioning something about monsters...' "
 	}
+
+	M4A1Carbine: {
+		DisplayName: M4A1 Carbine
+		Tooltip:
+			'''
+			18% chance to save ammo
+			'Made in the USA'
+			'''
+	}
+}
+
+NPCs: {
+	BucketZombie.DisplayName: Bucket Zombie
+	GiantZormHead.DisplayName: Giant Zorm
+	GiantZormBody.DisplayName: Giant Zorm
+	GiantZormTail.DisplayName: Giant Zorm
+	ZombieBat.DisplayName: Zombie Bat
+	ZombieEye.DisplayName: Zombie Eye
+	ZombieSlime.DisplayName: Zombie Slime
+	ZombieWithGun.DisplayName: Commando Zombie
+	ZombifiedMummy.DisplayName: Zombified Mummy
+	Zombunny.DisplayName: Zombunny
+	ZormHead.DisplayName: Zorm
+	ZormBody.DisplayName: Zorm
+	ZormTail.DisplayName: Zorm
+	Zombination.DisplayName: Zombination
+}
+
+Bestiary: {
+	BucketZombie: This zombie took a larger hit to its intelligence than most others of its ilk, causing it to inexplicably think that buckets were, in fact, a great defensive option.
+	GiantZorm: A massive cousin of the zorm, these creatures, transformed further by the effects of ancient magicks, tunnel through the ground in search of living beings to consume.
+	ZombieBat: Zombified bats that flutter through the caves underneath the surface.
+	ZombieEye: A servant of Chthulu that fell to the undead horde.
+	ZombieSlime: A slime ravaged by the undead horde. Blood permeates its gelatinous body.
+	ZombifiedMummy: A mummy brought back to the land of the living as an undead abomination.
+	Zombunny: A poor bunny cursed by undeath. It prowls the day and night in search of victims.
+	Zorm: A giant worm transformed by the undeath energy that permeates the land.
 }

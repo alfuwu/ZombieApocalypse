@@ -89,6 +89,13 @@ namespace ZombieApocalypse {
         [ReloadRequired]
         public bool ZombiesCanUseAmmoAndCoinSlots { get; set; }
 
+        [DefaultValue(true)] // too lazy to make these actually configurable with integers n such, deal with booleans
+        [ReloadRequired]
+        public bool ZombiesHaveSmallerInventories { get; set; }
+
+        [DefaultValue(true)]
+        public bool ZombiesHaveLessAccessories { get; set; }
+
         [DefaultValue(true)]
         public bool AllowZombiesToUseVoidbags { get; set; }
 
@@ -111,6 +118,9 @@ namespace ZombieApocalypse {
         [DefaultValue(true)]
         [ReloadRequired]
         public bool StrongerZomb { get; set; }
+
+        [DefaultValue(true)]
+        public bool EvenMoreZomb { get; set; }
 
         public static ZombieApocalypseConfig GetInstance() => ModContent.GetInstance<ZombieApocalypseConfig>();
 

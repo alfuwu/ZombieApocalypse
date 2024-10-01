@@ -20,24 +20,26 @@ public class MainHooks : ModHook {
 
     private void GUIHotbarDrawInner(ILContext il) {
         try {
-            ILCursor c = new(il);
-            c.GotoNext(MoveType.After, i => i.MatchLdcR4(236f)); // modifying position of item name text
-            ILLabel vanilla = il.DefineLabel();
-            c.Emit(OpCodes.Call, localPlayer); // load local player onto stack
-            c.Emit(OpCodes.Call, PlayerHooks.isZombie);
-            c.Emit(OpCodes.Brfalse_S, vanilla);
-            c.Emit(OpCodes.Pop);
-            c.Emit(OpCodes.Ldc_R4, 126f);
-            c.MarkLabel(vanilla);
+            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) {
+                ILCursor c = new(il);
+                c.GotoNext(MoveType.After, i => i.MatchLdcR4(236f)); // modifying position of item name text
+                ILLabel vanilla = il.DefineLabel();
+                c.Emit(OpCodes.Call, localPlayer); // load local player onto stack
+                c.Emit(OpCodes.Call, PlayerHooks.isZombie);
+                c.Emit(OpCodes.Brfalse_S, vanilla);
+                c.Emit(OpCodes.Pop);
+                c.Emit(OpCodes.Ldc_R4, 126f);
+                c.MarkLabel(vanilla);
 
-            c.GotoNext(MoveType.After, i => i.MatchLdcI4(10)); // modifying amount of hotbar slots shown
-            ILLabel vanilla2 = il.DefineLabel();
-            c.Emit(OpCodes.Call, localPlayer);
-            c.Emit(OpCodes.Call, PlayerHooks.isZombie);
-            c.Emit(OpCodes.Brfalse_S, vanilla2);
-            c.Emit(OpCodes.Pop);
-            c.Emit(OpCodes.Ldc_I4, PlayerHooks.zombieInventorySize);
-            c.MarkLabel(vanilla2);
+                c.GotoNext(MoveType.After, i => i.MatchLdcI4(10)); // modifying amount of hotbar slots shown
+                ILLabel vanilla2 = il.DefineLabel();
+                c.Emit(OpCodes.Call, localPlayer);
+                c.Emit(OpCodes.Call, PlayerHooks.isZombie);
+                c.Emit(OpCodes.Brfalse_S, vanilla2);
+                c.Emit(OpCodes.Pop);
+                c.Emit(OpCodes.Ldc_I4, PlayerHooks.zombieInventorySize);
+                c.MarkLabel(vanilla2);
+            }
         } catch (Exception e) {
             DumpIL(il);
             throw new ILPatchFailureException(Mod, il, e);

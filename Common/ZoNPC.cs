@@ -55,7 +55,7 @@ public class ZoNPC : GlobalNPC { // dont question the name, i couldnt think of a
 
     public override void OnSpawn(NPC npc, IEntitySource source) {
         if ((source is not EntitySource_Misc misc || misc.Context != "ZombieApocalypse") && ZombieApocalypseConfig.GetInstance().MoreZomb)
-            for (int _ = 0; _ < Main.rand.Next(2) + 3; _++)
+            for (int _ = 0; _ < 2 + Main.rand.Next(2); _++)
                 TrySpawn(npc);
     }
 
@@ -63,6 +63,11 @@ public class ZoNPC : GlobalNPC { // dont question the name, i couldnt think of a
         if (ZombieApocalypseConfig.GetInstance().IncreaseZombieArmDropChance)
             foreach (var rule in npcLoot.Get())
                 if (rule is CommonDrop drop && drop.itemId == ItemID.ZombieArm)
-                    drop.chanceDenominator = 5; // increase to 1/5 (20%) chance
+                    drop.chanceDenominator = 10; // increase to 1/10 (10%) chance
+    }
+
+    public override void EditSpawnRate(Player player, ref int spawnRate, ref int maxSpawns) {
+        if (ZombieApocalypseConfig.GetInstance().MoreZomb)
+            maxSpawns = (int)(maxSpawns * 1.5f);
     }
 }

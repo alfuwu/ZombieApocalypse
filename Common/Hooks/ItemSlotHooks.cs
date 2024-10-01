@@ -7,7 +7,8 @@ using ZombieApocalypse.Common.Extensions;
 namespace ZombieApocalypse.Common.Hooks;
 
 public class ItemSlotHooks : ModHook {
-    public static bool CanUseSlot(Item[] inv, int slot) => inv != Main.LocalPlayer.inventory || !Main.LocalPlayer.IsZombie() || slot < 5 || slot >= 50 && ZombieApocalypseConfig.GetInstance().ZombiesCanUseAmmoAndCoinSlots;
+    public static bool CanUseSlot(Item[] inv, int slot) =>
+        inv != Main.LocalPlayer.inventory || !Main.LocalPlayer.IsZombie() || slot < 5 || (ZombieApocalypseConfig.GetInstance(out var cfg).ZombiesCanUseAmmoAndCoinSlots && slot >= 50) || !cfg.ZombiesHaveSmallerInventories;
 
     public override void Apply() {
         On_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += OnDraw;
