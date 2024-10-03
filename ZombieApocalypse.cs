@@ -1,22 +1,33 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System.ComponentModel;
 using System.IO;
+using Terraria;
+using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using ZombieApocalypse.Common;
+using ZombieApocalypse.Common.Extensions;
 
 namespace ZombieApocalypse {
 	public class ZombieApocalypse : Mod {
 		public static Mod Mod { get; private set; }
         public const string Localization = $"Mods.{nameof(ZombieApocalypse)}";
+        public const string VisionShader = $"{nameof(ZombieApocalypse)}/ZombieVision";
 
         public override void Load() {
             Mod = this;
+            if (!Main.dedServ)
+                Filters.Scene[VisionShader] =
+                    new(new(Assets.Request<Effect>("Content/ZombieVision"), "ScreenPass"), EffectPriority.Medium);
         }
 
         public override object Call(params object[] args) {
             string msgType = (string)args[0];
             switch (msgType) {
+                case "Zombify":
+                    ((Player)args[0]).SetZombie((bool)args[1]);
+                    break;
                 default:
                     break;
             }
@@ -41,7 +52,7 @@ namespace ZombieApocalypse {
         }
     }
 
-    public class ZombieApocalypseConfig : ModConfig {
+    public class ZombieApocalypseConfig : ModConfig { // so many bools...
         public override ConfigScope Mode => ConfigScope.ServerSide;
 
         [DefaultValue(false)]
@@ -51,17 +62,16 @@ namespace ZombieApocalypse {
         public bool ZombiesCanTradeWithNPCs { get; set; }
 
         [DefaultValue(true)]
-        public bool ZombiesHaveADifferentSkinColor { get; set; }
+        public bool ZombiesCanFightOtherPlayersWithoutPvP { get; set; }
 
         [DefaultValue(true)]
-        public bool ZombiesCanFightOtherPlayersWithoutPvP { get; set; }
+        public bool ZombiesCanAttackTownNPCs { get; set; }
+
+        [DefaultValue(true)]
+        public bool ZombiesHaveADifferentSkinColor { get; set; }
 
         [ReloadRequired]
         public Color ZombieSkinColor { get; set; } = new(219, 214, 138);
-
-        [DefaultValue(3f)]
-        [Range(0.1f, 20f)]
-        public float ZombieSpawnChanceMult { get; set; }
 
         [DefaultValue(true)]
         public bool HostileNPCsAreMostlyFriendlyToZombies { get; set; }
@@ -109,6 +119,9 @@ namespace ZombieApocalypse {
         public bool EnableSuspiciousLookingFlask { get; set; }
 
         [DefaultValue(true)]
+        public bool EnableBodyFlux { get; set; }
+
+        [DefaultValue(true)]
         [ReloadRequired]
         public bool IncreaseZombieArmDropChance { get; set; }
 
@@ -121,6 +134,21 @@ namespace ZombieApocalypse {
 
         [DefaultValue(true)]
         public bool EvenMoreZomb { get; set; }
+
+        [DefaultValue(true)]
+        public bool ApplyCustomVisionShaderToZombies { get; set; }
+
+        [DefaultValue(true)]
+        public bool ZombifyPlayersOnRespawn { get; set; }
+
+        [DefaultValue(true)]
+        public bool RespawnNewZombiesWhereTheyDied { get; set; }
+
+        [DefaultValue(false)]
+        public bool AlwaysRespawnZombiesWhereTheyDied { get; set; }
+
+        [DefaultValue(true)]
+        public bool ZombifiedPlayersSpawnAtOceans { get; set; }
 
         public static ZombieApocalypseConfig GetInstance() => ModContent.GetInstance<ZombieApocalypseConfig>();
 

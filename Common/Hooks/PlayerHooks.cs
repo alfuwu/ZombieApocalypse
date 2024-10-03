@@ -60,6 +60,7 @@ public class PlayerHooks : ModHook {
         On_Player.GetItem_FillIntoOccupiedSlot += OnGetItem_FillIntoOccupiedSlot;
         On_Player.InOpposingTeam += OnInOpposingTeam;
         On_Player.IsItemSlotUnlockedAndUsable += OnIsItemSlotUnlockedAndUsable;
+        On_Player.Spawn_SetPositionAtWorldSpawn += OnSpawn_SetPositionAtWorldSpawn;
         On_Player.Update += OnUpdate;
         On_Player.useVoidBag += OnUseVoidbag;
     }
@@ -100,6 +101,7 @@ public class PlayerHooks : ModHook {
         On_Player.GetItem_FillIntoOccupiedSlot -= OnGetItem_FillIntoOccupiedSlot;
         On_Player.InOpposingTeam -= OnInOpposingTeam;
         On_Player.IsItemSlotUnlockedAndUsable -= OnIsItemSlotUnlockedAndUsable;
+        On_Player.Spawn_SetPositionAtWorldSpawn -= OnSpawn_SetPositionAtWorldSpawn;
         On_Player.Update -= OnUpdate;
         On_Player.useVoidBag -= OnUseVoidbag;
     }
@@ -134,6 +136,115 @@ public class PlayerHooks : ModHook {
 
     private bool OnGetItem_FillIntoOccupiedSlot(On_Player.orig_GetItem_FillIntoOccupiedSlot orig, Player self, int plr, Item newItem, GetItemSettings settings, Item returnItem, int i) =>
         (!self.IsZombie() || i < zombieInventorySize || !ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) && orig(self, plr, newItem, settings, returnItem, i);
+
+    private static void Spawn_SetPosition(Player player, int floorX, int floorY) { // copy of Spawn_SetPosition from Player class
+        player.position.X = floorX * 16 + 8 - player.width / 2;
+        player.position.Y = floorY * 16 - player.height;
+    }
+
+    private static bool Spawn_IsAreaAValidWorldSpawn(int floorX, int floorY) {
+        for (int i = floorX - 1; i < floorX + 2; i++)
+            for (int j = floorY - 3; j < floorY; j++)
+                if (i >= 0 && i <= Main.maxTilesX && j >= 0 && j <= Main.maxTilesY && (Main.tile[i, j].HasUnactuatedTile && Main.tileSolid[Main.tile[i, j].TileType] && !Main.tileSolidTop[Main.tile[i, j].TileType] || Main.tile[i, j].LiquidAmount > 0))
+                    return false;
+        return true;
+    }
+
+    private static void Spawn_ForceClearArea(int floorX, int floorY) {
+        for (int i = floorX - 1; i < floorX + 2; i++) {
+            for (int j = floorY - 3; j < floorY; j++) {
+                if (Main.tile[i, j] != null) {
+                    if (Main.tile[i, j].HasUnactuatedTile && Main.tileSolid[Main.tile[i, j].TileType] && !Main.tileSolidTop[Main.tile[i, j].TileType])
+                        WorldGen.KillTile(i, j);
+
+                    if (Main.tile[i, j].LiquidAmount > 0) {
+                        Tile tile = Main.tile[i, j];
+                        tile.LiquidType = 0;
+                        tile.LiquidAmount = 0;
+                        WorldGen.SquareTileFrame(i, j);
+                    }
+                }
+            }
+        }
+    }
+
+    private static bool Spawn_GetPositionAtWorldSpawn(ref int floorX, ref int floorY) {
+        int spawnTileX = floorX;
+        int num = floorY;
+        if (!Spawn_IsAreaAValidWorldSpawn(spawnTileX, num)) {
+            bool flag = false;
+            if (!flag) {
+                for (int i = 0; i < 30; i++) {
+                    if (Spawn_IsAreaAValidWorldSpawn(spawnTileX, num - i)) {
+                        num -= i;
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!flag) {
+                for (int j = 0; j < 30; j++) {
+                    if (Spawn_IsAreaAValidWorldSpawn(spawnTileX, num - j)) {
+                        num -= j;
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+
+            if (flag) {
+                floorX = spawnTileX;
+                floorY = num;
+                return true;
+            }
+
+            return false;
+        }
+
+        num = Spawn_DescendFromDefaultSpace(spawnTileX, num);
+        floorX = spawnTileX;
+        floorY = num;
+        return false;
+    }
+    
+    private static int Spawn_DescendFromDefaultSpace(int x, int y) {
+        for (int i = y; i < Main.maxTilesY; i++) {
+            for (int j = -1; j <= 1; j++) {
+                Tile tile = Main.tile[x + j, i];
+                if (tile.HasUnactuatedTile && (Main.tileSolid[tile.TileType] || Main.tileSolidTop[tile.TileType]))
+                    return i;
+            }
+        }
+
+        return y;
+    }
+
+    private static void DoSpawnThingy(Player player, float x, float y) {
+        int floorX = (int)x;
+        int floorY = (int)y;
+        bool bl = Spawn_GetPositionAtWorldSpawn(ref floorX, ref floorY);
+        Spawn_SetPosition(player, floorX, floorY);
+        if (bl && !Spawn_IsAreaAValidWorldSpawn(floorX, floorY))
+            Spawn_ForceClearArea(floorX, floorY);
+    }
+
+    // this hook is so scuffed
+    // but it seems to work as intended so
+    private void OnSpawn_SetPositionAtWorldSpawn(On_Player.orig_Spawn_SetPositionAtWorldSpawn orig, Player self) {
+        if ((ZombieApocalypseConfig.GetInstance(out var cfg).AlwaysRespawnZombiesWhereTheyDied && self.IsZombie() && !cfg.UnzombifyPlayersOnDeath) || (cfg.RespawnNewZombiesWhereTheyDied && !self.IsZombie() && self.IsZombifiableDeath()))
+            DoSpawnThingy(self, self.position.X / 16, self.position.Y / 16);
+        else if (cfg.ZombifiedPlayersSpawnAtOceans && (self.IsZombifiableDeath() || self.IsZombie()))
+            DoSpawnThingy(self, Main.rand.NextBool() ? Main.maxTilesX - 300 : 300, 0);
+        else
+            orig(self);
+        if (cfg.ZombifyPlayersOnRespawn && !self.IsZombie() && self.IsZombifiableDeath()) {
+            self.statLife = self.statLifeMax / 2;
+            self.SetZombie(true);
+            self.GetModPlayer<ZombifiablePlayer>().ClientHandleZombification();
+            self.GetModPlayer<ZombifiablePlayer>().LastDeathReason = null;
+        }
+    }
 
     private void OnUpdate(On_Player.orig_Update orig, Player self, int i) {
         if (self.IsZombie() && ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) { // hacky solution right 'ere

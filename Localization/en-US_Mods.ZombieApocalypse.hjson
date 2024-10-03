@@ -61,11 +61,6 @@ Configs: {
 			Tooltip: Allows zombies to fight other players without PvP enabled, and vice-versa
 		}
 
-		ZombieSpawnChanceMult: {
-			Label: Zombie Spawn Multiplier
-			Tooltip: Multiplies the frequency and chance for zombies to spawn
-		}
-
 		InitialInfectionPlayers: {
 			Label: Initial Infection Players
 			Tooltip: The amount of players to infect when using the /infection command
@@ -130,6 +125,41 @@ Configs: {
 			Label: Zombies Have Less Accessories
 			Tooltip: Makes zombies only able to access the first two accessory slots (3 after consuming a Demon Heart, and 4 on master mode after consuming a Demon Heart)
 		}
+
+		ApplyCustomVisionShaderToZombies: {
+			Label: Apply Custom Vision Shader to Zombies
+			Tooltip: Applies a custom vision shader to all zombies
+		}
+
+		ZombifyPlayersOnRespawn: {
+			Label: Zombify Players on Respawn
+			Tooltip: If false, players will immediately become zombies instead of dying
+		}
+
+		RespawnNewZombiesWhereTheyDied: {
+			Label: Respawn New Zombies Where They Died
+			Tooltip: Respawns new zombies where they died (requires Zombify Players on Respawn to be true)
+		}
+
+		AlwaysRespawnZombiesWhereTheyDied: {
+			Label: Always Respawn Zombies Where They Died
+			Tooltip: When a zombie dies, they will respawn at their position of death
+		}
+
+		ZombifiedPlayersSpawnAtOceans: {
+			Label: Zombified Players Spawn at Oceans
+			Tooltip: Spawns zombified players at the edges of the map, instead of the center
+		}
+
+		EnableBodyFlux: {
+			Label: Enable Body Flux
+			Tooltip: Enables the Body Flux debuff, which prevents the Holy Cure or Suspicious Looking Flask from working while applied
+		}
+
+		ZombiesCanAttackTownNPCs: {
+			Label: Zombies Can Attack Town N P Cs
+			Tooltip: ""
+		}
 	}
 }
 
@@ -180,4 +210,11 @@ Bestiary: {
 	ZombifiedMummy: A mummy brought back to the land of the living as an undead abomination.
 	Zombunny: A poor bunny cursed by undeath. It prowls the day and night in search of victims.
 	Zorm: A giant worm transformed by the undeath energy that permeates the land.
+}
+
+Buffs: {
+	BodyFlux: {
+		DisplayName: Body Flux
+		Description: Your body is refusing to change!
+	}
 }

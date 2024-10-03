@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.DataStructures;
+using Terraria.ID;
 
 namespace ZombieApocalypse.Common.Extensions;
 
@@ -15,5 +17,10 @@ public static class PlayerExtensions {
             player.skinColor = cfg.ZombieSkinColor;
         else
             player.skinColor = p.OriginalSkinColor;
+    }
+
+    public static bool IsZombifiableDeath(this Player player, PlayerDeathReason deathReason = null) {
+        PlayerDeathReason damageSource = deathReason ?? player.GetModPlayer<ZombifiablePlayer>().LastDeathReason;
+        return damageSource != null && player.whoAmI == Main.myPlayer && (!ZombieApocalypseConfig.GetInstance().OnlyTransformPlayerIfKilledByZombie || (damageSource.TryGetCausingNPC(out NPC npc) && NPCID.Sets.Zombies[npc.type]) || (damageSource.TryGetCausingEntity(out Entity entity) && entity is Player p && p.IsZombie()));
     }
 }

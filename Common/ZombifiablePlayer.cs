@@ -2,6 +2,7 @@
 using System.IO;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.Graphics.Effects;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -13,6 +14,8 @@ namespace ZombieApocalypse.Common;
 public class ZombifiablePlayer : ModPlayer {
     public bool Zombified { get; set; } = false;
     public Color OriginalSkinColor { get; set; } // hacky skin color solution
+    public PlayerDeathReason LastDeathReason { get; set; }
+    private bool aggroModified = false;
 
     public static bool ExposedToSky(Player player, bool affectedByWind = false) {
         Point playerTileCoordinate = player.Center.ToTileCoordinates();
@@ -28,19 +31,25 @@ public class ZombifiablePlayer : ModPlayer {
     public override bool CanBeHitByProjectile(Projectile proj) => !ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies || !Zombified || (proj.TryGetOwner(out Player p) && p.InOpposingTeam(Player));
 
     public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genDust, ref PlayerDeathReason damageSource) {
-        if (!Zombified && Player.whoAmI == Main.myPlayer && (!ZombieApocalypseConfig.GetInstance().OnlyTransformPlayerIfKilledByZombie || (damageSource.TryGetCausingNPC(out NPC npc) && NPCID.Sets.Zombies[npc.type]) || (damageSource.TryGetCausingEntity(out Entity entity) && entity is Player player && player.IsZombie()))) {
-            Player.statLife = Player.statLifeMax / 2;
-            Player.SetZombie(true);
-            ClientHandleZombification();
-            return false;
+        if (!Zombified && Player.IsZombifiableDeath(damageSource)) {
+            if (ZombieApocalypseConfig.GetInstance().ZombifyPlayersOnRespawn) {
+                LastDeathReason = damageSource;
+            } else {
+                Player.statLife = Player.statLifeMax / 2;
+                Player.SetZombie(true);
+                ClientHandleZombification();
+                return false;
+            }
         }
         return true;
     }
 
-    public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource) {
-        if (Player.whoAmI == Main.myPlayer && ZombieApocalypseConfig.GetInstance().UnzombifyPlayersOnDeath && Player.IsZombie()) {
-            Player.SetZombie(false);
-            ClientHandleZombification();
+    public override void OnRespawn() {
+        if (Player.whoAmI == Main.myPlayer) {
+            if (ZombieApocalypseConfig.GetInstance(out var cfg).UnzombifyPlayersOnDeath && Player.IsZombie()) {
+                Player.SetZombie(false);
+                ClientHandleZombification();
+            }
         }
     }
 
@@ -70,21 +79,38 @@ public class ZombifiablePlayer : ModPlayer {
 
     // aggro modifications
     public override void PreUpdate() {
-        if (!Zombified && ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies)
-            Player.aggro = 0;
+        if (Zombified && ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies && Player.aggro > -1000) {
+            Player.aggro = -1000;
+            aggroModified = true;
+        }
     }
 
-    public override void PostUpdate() { // huh, terraria doesn't like negative 100k aggro apparently
-        if (Zombified) {
-            if (ZombieApocalypseConfig.GetInstance(out var cfg).HostileNPCsAreMostlyFriendlyToZombies)
-                Player.aggro = -100000;
+    public override void PostUpdate() {
+        if (!Zombified && aggroModified) {
+            Player.aggro = 0;
+            aggroModified = false;
+        } else if (Zombified && Player.whoAmI == Main.myPlayer) {
+            if (ZombieApocalypseConfig.GetInstance(out var cfg).HostileNPCsAreMostlyFriendlyToZombies) {
+                Player.aggro = -1000;
+                aggroModified = true;
+            }
             if (cfg.ZombiesGetWeaknessWhenExposedToSun && Main.IsItDay() && ExposedToSky(Player) && !Player.buffImmune[BuffID.Weak])
                 if (Player.HasBuff(BuffID.Weak) && Player.buffTime[Player.FindBuffIndex(BuffID.Weak)] <= 301)
                     Player.buffTime[Player.FindBuffIndex(BuffID.Weak)] = 302;
                 else if (!Player.HasBuff(BuffID.Weak))
                     Player.AddBuff(BuffID.Weak, 302);
+            if (Main.netMode != NetmodeID.Server && cfg.ApplyCustomVisionShaderToZombies && !Filters.Scene[ZombieApocalypse.VisionShader].Active) {
+                Filters.Scene.Activate(ZombieApocalypse.VisionShader);
+                //if (Player.dead)
+                //    Filters.Scene[ZombieApocalypse.VisionShader].GetShader().UseIntensity(0);// Filters.Scene[ZombieApocalypse.VisionShader].GetShader().Intensity + 0.02f);
+            }
+        } else if (Main.netMode != NetmodeID.Server && Filters.Scene[ZombieApocalypse.VisionShader].Active) {
+            Filters.Scene.Deactivate(ZombieApocalypse.VisionShader);
+            Filters.Scene[ZombieApocalypse.VisionShader].GetShader().UseIntensity(-1);
         }
     }
+
+    public override bool? CanHitNPCWithItem(Item item, NPC target) => target.friendly ? Player.IsZombie() && ZombieApocalypseConfig.GetInstance().ZombiesCanAttackTownNPCs : null;
 
     public override bool CanSellItem(NPC vendor, Item[] shopInventory, Item item) => ZombieApocalypseConfig.GetInstance().ZombiesCanTradeWithNPCs;
 

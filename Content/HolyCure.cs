@@ -32,9 +32,11 @@ public class HolyCure : ModItem {
     }
 
     public override bool? UseItem(Player player) {
-        if (player.ItemAnimationJustStarted && player.IsZombie() && player.whoAmI == Main.myPlayer && Main.rand.NextFloat() < 0.99f && ZombieApocalypseConfig.GetInstance().EnableHolyCure) { // gotta stay lore accurate yk?
+        if (player.ItemAnimationJustStarted && player.IsZombie() && player.whoAmI == Main.myPlayer && Main.rand.NextFloat() < 0.99f && ZombieApocalypseConfig.GetInstance(out var cfg).EnableHolyCure && (!cfg.EnableBodyFlux || !player.HasBuff<BodyFlux>())) { // gotta stay lore accurate yk?
             player.SetZombie(false);
             player.GetModPlayer<ZombifiablePlayer>().ClientHandleZombification();
+            if (cfg.EnableBodyFlux)
+                player.AddBuff(ModContent.BuffType<BodyFlux>(), 3600);
         }
         return true;
     }

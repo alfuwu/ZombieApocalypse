@@ -3,7 +3,7 @@ using Terraria.ModLoader;
 
 namespace ZombieApocalypse.Content.ExtraZombs;
 
-//[AutoloadBossHead]
+/*[AutoloadBossHead]
 public class Zombination : ModNPC {
     public override void SetStaticDefaults() {
 
@@ -20,3 +20,4 @@ public class Zombination : ModNPC {
         
     }
 }
+*/

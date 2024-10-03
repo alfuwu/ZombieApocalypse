@@ -23,8 +23,8 @@ public class ZoNPC : GlobalNPC { // dont question the name, i couldnt think of a
             npc.defense += 3;
             npc.defDefense += 3;
             npc.knockBackResist *= 1.2f;
-            npc.lifeMax = (int)(npc.lifeMax * 1.4f);
-            npc.life = (int)(npc.life * 1.4f);
+            npc.lifeMax = (int)(npc.lifeMax * 1.05f);
+            npc.life = (int)(npc.life * 1.05f);
         }
     }
 
@@ -63,7 +63,7 @@ public class ZoNPC : GlobalNPC { // dont question the name, i couldnt think of a
         if (ZombieApocalypseConfig.GetInstance().IncreaseZombieArmDropChance)
             foreach (var rule in npcLoot.Get())
                 if (rule is CommonDrop drop && drop.itemId == ItemID.ZombieArm)
-                    drop.chanceDenominator = 10; // increase to 1/10 (10%) chance
+                    drop.chanceDenominator = 20; // increase to 1/20 (5%) chance
     }
 
     public override void EditSpawnRate(Player player, ref int spawnRate, ref int maxSpawns) {

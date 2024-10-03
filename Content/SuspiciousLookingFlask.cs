@@ -32,9 +32,11 @@ public class SuspiciousLookingFlask : ModItem {
     }
 
     public override bool? UseItem(Player player) {
-        if (player.ItemAnimationJustStarted && !player.IsZombie() && player.whoAmI == Main.myPlayer && ZombieApocalypseConfig.GetInstance().EnableSuspiciousLookingFlask) {
+        if (player.ItemAnimationJustStarted && !player.IsZombie() && player.whoAmI == Main.myPlayer && ZombieApocalypseConfig.GetInstance(out var cfg).EnableSuspiciousLookingFlask && (!cfg.EnableBodyFlux || !player.HasBuff<BodyFlux>())) {
             player.SetZombie(true);
             player.GetModPlayer<ZombifiablePlayer>().ClientHandleZombification();
+            if (cfg.EnableBodyFlux)
+                player.AddBuff(ModContent.BuffType<BodyFlux>(), 3600);
         }
         return true;
     }

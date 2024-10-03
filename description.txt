@@ -9,3 +9,5 @@ You can also damage players, regardless of PvP status.
 This mod also ramps up zombie spawns :)
 
 Recommended to play with friends on a Master mode (hardcore?) world.
+
+Most of this mod is configurable, so make sure you take a look at the config to adjust the mod so that you can play it how you like it :)
