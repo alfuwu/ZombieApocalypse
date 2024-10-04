@@ -23,8 +23,8 @@ public class ZoNPC : GlobalNPC { // dont question the name, i couldnt think of a
             npc.defense += 3;
             npc.defDefense += 3;
             npc.knockBackResist *= 1.2f;
-            npc.lifeMax = (int)(npc.lifeMax * 1.05f);
-            npc.life = (int)(npc.life * 1.05f);
+            npc.lifeMax = (int)(npc.lifeMax * 1.4f);
+            npc.life = (int)(npc.life * 1.4f);
         }
     }
 

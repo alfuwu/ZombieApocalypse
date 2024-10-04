@@ -10,4 +10,4 @@ This mod also ramps up zombie spawns :)
 
 Recommended to play with friends on a Master mode (hardcore?) world.
 
-Most of this mod is configurable, so take a look at the config if you want adjust the mod, because you most likely can! :)
+Most of this mod is configurable, so take a look at the config if you want to adjust the mod, because you most likely can! :)

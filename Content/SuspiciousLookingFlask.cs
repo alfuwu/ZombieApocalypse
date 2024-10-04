@@ -11,9 +11,9 @@ public class SuspiciousLookingFlask : ModItem {
         Item.ResearchUnlockCount = 1;
 
         ItemID.Sets.DrinkParticleColors[Type] = [
-            new(240, 240, 240),
-            new(200, 200, 200),
-            new(140, 140, 140)
+            new(227, 232, 150),
+            new(209, 214, 138),
+            new(151, 155, 100)
         ];
     }
 

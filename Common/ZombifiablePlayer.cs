@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using System.IO;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.Graphics.Effects;
 using Terraria.ID;
@@ -24,6 +26,19 @@ public class ZombifiablePlayer : ModPlayer {
         bool canHitSky = Collision.CanHit(new Vector2(headPosition.X + player.width / 2, headPosition.Y), 1, 1, new Vector2(Main.screenPosition.X + (Main.screenWidth / 2) + (affectedByWind ? -Main.screenWidth * Main.windSpeedCurrent * (MathHelper.Pi / 10) : 0), Main.screenPosition.Y), 1, 1);
 
         return !(playerTileCoordinate.Y <= 50 && playerTileCoordinate.Y > Main.rockLayer) && canHitSky;
+    }
+
+    public static void ZombificationDusts(Player player) {
+        for (int i = 0; i < 500 + Main.rand.Next(100); i++) {
+            float ang = Main.rand.NextFloat(0, MathHelper.TwoPi);
+            Vector2 dustPosition = player.Center + new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) * Main.rand.NextFloat(0, 50);
+            Dust dust = Dust.NewDustDirect(dustPosition, 0, 0, DustID.Smoke, Main.rand.NextFloat() - 0.5f, Main.rand.NextFloat() - 0.5f, 150, new(1f, 0.2f, 0.3f), 1.5f);
+
+            dust.velocity *= 3f;
+            dust.noGravity = true;
+            dust.fadeIn = 1.3f;
+        }
+        SoundEngine.PlaySound(SoundID.NPCHit14, player.Center);
     }
 
     public override bool CanBeHitByNPC(NPC npc, ref int cooldownSlot) => !ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies || !Zombified || npc.target == Player.whoAmI;
@@ -64,7 +79,7 @@ public class ZombifiablePlayer : ModPlayer {
     public override void LoadData(TagCompound tag) {
         Zombified = tag.TryGet("Zombified", out bool zombified) && zombified;
         OriginalSkinColor = tag.TryGet("SkinColor", out Color color) ? color : Player.skinColor;
-        if (zombified && ZombieApocalypseConfig.GetInstance(out var cfg).ZombiesHaveADifferentSkinColor)
+        if (ZombieApocalypseConfig.GetInstance(out var cfg).ZombiesHaveADifferentSkinColor && Zombified)
             Player.skinColor = cfg.ZombieSkinColor;
     }
 
@@ -75,6 +90,13 @@ public class ZombifiablePlayer : ModPlayer {
             Main.NewText(Language.GetTextValue($"{ZombieApocalypse.Localization}.Player{(Zombified ? "Zombified" : "Unzombified")}", Player.name), 50, 255, 130);
         if (Main.netMode == NetmodeID.MultiplayerClient)
             SendZombificationStatusChange(Player.whoAmI, Zombified, fromInfection);
+        if (Zombified && cfg.ZombificationParticles)
+            ZombificationDusts(Player);
+    }
+
+    public override void OnEnterWorld() {
+        Filters.Scene[ZombieApocalypse.VisionShader].GetShader().UseIntensity(-1);
+        Filters.Scene.Activate(ZombieApocalypse.VisionShader);
     }
 
     // aggro modifications
@@ -99,13 +121,11 @@ public class ZombifiablePlayer : ModPlayer {
                     Player.buffTime[Player.FindBuffIndex(BuffID.Weak)] = 302;
                 else if (!Player.HasBuff(BuffID.Weak))
                     Player.AddBuff(BuffID.Weak, 302);
-            if (Main.netMode != NetmodeID.Server && cfg.ApplyCustomVisionShaderToZombies && !Filters.Scene[ZombieApocalypse.VisionShader].Active) {
-                Filters.Scene.Activate(ZombieApocalypse.VisionShader);
-                //if (Player.dead)
-                //    Filters.Scene[ZombieApocalypse.VisionShader].GetShader().UseIntensity(0);// Filters.Scene[ZombieApocalypse.VisionShader].GetShader().Intensity + 0.02f);
-            }
-        } else if (Main.netMode != NetmodeID.Server && Filters.Scene[ZombieApocalypse.VisionShader].Active) {
-            Filters.Scene.Deactivate(ZombieApocalypse.VisionShader);
+            if (Main.netMode != NetmodeID.Server && cfg.ApplyCustomVisionShaderToZombies && Filters.Scene[ZombieApocalypse.VisionShader].GetShader().Intensity < 0)
+                Filters.Scene[ZombieApocalypse.VisionShader].GetShader().UseIntensity(0);
+            else if (Main.netMode != NetmodeID.Server && Filters.Scene[ZombieApocalypse.VisionShader].GetShader().Intensity >= 0)
+                Filters.Scene[ZombieApocalypse.VisionShader].GetShader().UseIntensity(-1);
+        } else if (Main.netMode != NetmodeID.Server && Filters.Scene[ZombieApocalypse.VisionShader].GetShader().Intensity >= 0 && Player.whoAmI == Main.myPlayer) {
             Filters.Scene[ZombieApocalypse.VisionShader].GetShader().UseIntensity(-1);
         }
     }
@@ -143,13 +163,16 @@ public class ZombifiablePlayer : ModPlayer {
         // if the server receives this message, send it to all other clients to sync the effects
         if (Main.netMode == NetmodeID.Server)
             SendZombificationStatusChange(player, isZombie, fromInfection);
-        else if (isZombie && (ZombieApocalypseConfig.GetInstance(out var cfg).BroadcastZombificationText || fromInfection && cfg.BroadcastInfectionPlayers))
+        else if ((ZombieApocalypseConfig.GetInstance(out var cfg).BroadcastZombificationText || fromInfection && cfg.BroadcastInfectionPlayers) && isZombie)
             if (fromInfection) // if logic go brrr
                 Main.NewText(Language.GetTextValue($"{ZombieApocalypse.Localization}.PlayerZombifiedInfection", Main.player[player].name), 50, 255, 130);
             else // no braces round these parts officer, no siree
                 Main.NewText(Language.GetTextValue($"{ZombieApocalypse.Localization}.PlayerZombified", Main.player[player].name), 50, 255, 130);
-        else if (!isZombie && ZombieApocalypseConfig.GetInstance().BroadcastUnzombificationText)
+        else if (cfg.BroadcastUnzombificationText && !isZombie)
             Main.NewText(Language.GetTextValue($"{ZombieApocalypse.Localization}.PlayerUnzombified", Main.player[player].name), 50, 255, 130);
+
+        if (isZombie && ZombieApocalypseConfig.GetInstance().ZombificationParticles)
+            ZombificationDusts(Main.player[player]);
     }
 
     public static void SendZombificationStatusChange(int whoAmI, bool newZombified, bool fromInfection = false, bool ignoreClient = true) {

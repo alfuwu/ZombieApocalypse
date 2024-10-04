@@ -49,5 +49,5 @@ public class ZombieSlime: ModNPC {
             NPC.frame.Y = 0;
     }
 
-    public override float SpawnChance(NPCSpawnInfo spawnInfo) => ZombieApocalypseConfig.GetInstance().EvenMoreZomb && spawnInfo.Player.ZoneOverworldHeight && (spawnInfo.Player.ZoneForest || spawnInfo.Player.ZonePurity) ? Main.IsItDay() ? 0.1f : 0.15f : 0f;
+    public override float SpawnChance(NPCSpawnInfo spawnInfo) => ZombieApocalypseConfig.GetInstance().EvenMoreZomb && spawnInfo.Player.ZoneForest ? Main.IsItDay() ? 0.1f : 0.15f : 0f;
 }

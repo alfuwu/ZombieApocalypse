@@ -26,6 +26,7 @@ public class ZombieEye : ModNPC {
         NPC.defense = 2;
         NPC.lifeMax = 60;
         NPC.value = 75f;
+        NPC.knockBackResist = 0.8f;
     }
 
     public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry) {
@@ -66,5 +67,5 @@ public class ZombieEye : ModNPC {
             NPC.frame.Y = 0;
     }
 
-    public override float SpawnChance(NPCSpawnInfo spawnInfo) => ZombieApocalypseConfig.GetInstance().EvenMoreZomb && !Main.IsItDay() && (spawnInfo.Player.ZoneForest || spawnInfo.Player.ZonePurity) ? 0.3f : 0f;
+    public override float SpawnChance(NPCSpawnInfo spawnInfo) => ZombieApocalypseConfig.GetInstance().EvenMoreZomb && !Main.IsItDay() && spawnInfo.Player.ZoneForest ? 0.3f : 0f;
 }

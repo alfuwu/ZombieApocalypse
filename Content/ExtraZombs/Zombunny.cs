@@ -82,5 +82,5 @@ public class Zombunny : ModNPC {
         }
     }
 
-    public override float SpawnChance(NPCSpawnInfo spawnInfo) => ZombieApocalypseConfig.GetInstance().EvenMoreZomb && Main.IsItDay() && spawnInfo.Player.ZoneOverworldHeight && (spawnInfo.Player.ZoneForest || spawnInfo.Player.ZonePurity || spawnInfo.Player.ZoneRain) ? 0.005f : 0f;
+    public override float SpawnChance(NPCSpawnInfo spawnInfo) => ZombieApocalypseConfig.GetInstance().EvenMoreZomb && Main.IsItDay() && spawnInfo.Player.ZoneForest ? 0.005f : 0f;
 }

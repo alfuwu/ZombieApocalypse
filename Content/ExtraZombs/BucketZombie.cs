@@ -3,6 +3,7 @@ using Terraria;
 using Terraria.ModLoader;
 using ZombieApocalypse.Common.Extensions;
 using Terraria.GameContent.Bestiary;
+using Microsoft.Xna.Framework;
 
 namespace ZombieApocalypse.Content.ExtraZombs;
 
@@ -35,6 +36,20 @@ public class BucketZombie : ModNPC {
         ]);
     }
 
+    public override void HitEffect(NPC.HitInfo hit) {
+        if (Main.netMode != NetmodeID.Server && NPC.life <= 0) {
+            int headGore = Mod.Find<ModGore>($"{Name}_Gore_Head").Type;
+            int bodyGore = Mod.Find<ModGore>($"{Name}_Gore_Body").Type;
+            int armGore = Mod.Find<ModGore>($"{Name}_Gore_Arm").Type;
+            int bucket = Mod.Find<ModGore>("Bucket_Gore").Type;
+            Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, headGore, 1f);
+            Gore.NewGore(NPC.GetSource_Death(), NPC.position, NPC.velocity, bucket, 1f);
+            Gore.NewGore(NPC.GetSource_Death(), NPC.position + new Vector2(0, 20), NPC.velocity, armGore);
+            Gore.NewGore(NPC.GetSource_Death(), NPC.position + new Vector2(0, 20), NPC.velocity, armGore);
+            Gore.NewGore(NPC.GetSource_Death(), NPC.position + new Vector2(0, 34), NPC.velocity, bodyGore);
+        }
+    }
+
     public override void AI() {
         this.BasicFighterAI();
     }
@@ -42,4 +57,5 @@ public class BucketZombie : ModNPC {
     public override void FindFrame(int frameHeight) {
         this.BasicFighterFrame(frameHeight);
     }
+    public override float SpawnChance(NPCSpawnInfo spawnInfo) => ZombieApocalypseConfig.GetInstance().EvenMoreZomb && !Main.IsItDay() && spawnInfo.Player.ZoneForest ? 0.3f : 0f;
 }

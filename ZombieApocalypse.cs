@@ -155,6 +155,9 @@ namespace ZombieApocalypse {
         [DefaultValue(true)]
         public bool ZombifiedPlayersSpawnAtOceans { get; set; }
 
+        [DefaultValue(true)]
+        public bool ZombificationParticles { get; set; }
+
         public static ZombieApocalypseConfig GetInstance() => ModContent.GetInstance<ZombieApocalypseConfig>();
 
         public static ZombieApocalypseConfig GetInstance(out ZombieApocalypseConfig config) {

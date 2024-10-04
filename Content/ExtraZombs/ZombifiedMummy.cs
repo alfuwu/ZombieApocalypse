@@ -38,6 +38,38 @@ public class ZombifiedMummy : ModNPC {
         ]);
     }
 
+    public override void HitEffect(NPC.HitInfo hit) {
+        if (Main.netMode != NetmodeID.Server) {
+            if (NPC.life > 0) {
+                for (int num730 = 0; num730 < hit.Damage / (double)NPC.lifeMax * 50.0; num730++) {
+                    int num731 = Dust.NewDust(NPC.position, NPC.width, NPC.height, 31, 0f, 0f, 0, default, 1.5f);
+                    Dust dust = Main.dust[num731];
+                    dust.velocity *= 2f;
+                    Main.dust[num731].noGravity = true;
+                }
+
+                return;
+            }
+
+            for (int num732 = 0; num732 < 20; num732++) {
+                int num733 = Dust.NewDust(NPC.position, NPC.width, NPC.height, 31, 0f, 0f, 0, default, 1.5f);
+                Dust dust = Main.dust[num733];
+                dust.velocity *= 2f;
+                Main.dust[num733].noGravity = true;
+            }
+
+            int num734 = Gore.NewGore(NPC.GetSource_Death(), new Vector2(NPC.position.X, NPC.position.Y - 10f), new Vector2(hit.HitDirection, 0f), 61, NPC.scale);
+            Gore gore2 = Main.gore[num734];
+            gore2.velocity *= 0.3f;
+            num734 = Gore.NewGore(NPC.GetSource_Death(), new Vector2(NPC.position.X, NPC.position.Y + (NPC.height / 2) - 10f), new Vector2(hit.HitDirection, 0f), 62, NPC.scale);
+            gore2 = Main.gore[num734];
+            gore2.velocity *= 0.3f;
+            num734 = Gore.NewGore(NPC.GetSource_Death(), new Vector2(NPC.position.X, NPC.position.Y + NPC.height - 10f), new Vector2(hit.HitDirection, 0f), 63, NPC.scale);
+            gore2 = Main.gore[num734];
+            gore2.velocity *= 0.3f;
+        }
+    }
+
     public override void AI() {
         this.BasicFighterAI();
     }
@@ -343,5 +375,8 @@ public class ZombifiedMummy : ModNPC {
 
         NPC.frameCounter = 0.0;
         NPC.frame.Y = frameHeight;
+        
     }
+
+    public override float SpawnChance(NPCSpawnInfo spawnInfo) => ZombieApocalypseConfig.GetInstance().EvenMoreZomb && !Main.IsItDay() && (spawnInfo.Player.ZoneDesert || spawnInfo.Player.ZoneUndergroundDesert) && Main.hardMode ? 0.3f : 0f;
 }
