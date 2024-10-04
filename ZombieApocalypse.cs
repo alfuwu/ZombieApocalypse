@@ -102,11 +102,9 @@ namespace ZombieApocalypse {
         public bool BroadcastInfectionPlayers { get; set; }
 
         [DefaultValue(false)]
-        [ReloadRequired]
         public bool ZombiesCanUseAmmoAndCoinSlots { get; set; }
 
         [DefaultValue(true)] // too lazy to make these actually configurable with integers n such, deal with booleans
-        [ReloadRequired]
         public bool ZombiesHaveSmallerInventories { get; set; }
 
         [DefaultValue(true)]

@@ -27,17 +27,18 @@ public class ChestUIHooks : ModHook {
 
     private void QuickStack(ILContext il) {
         try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) {
-                ILCursor c = new(il);
-                c.GotoNext(MoveType.After, i => i.MatchLdcI4(50));
-                ILLabel vanilla = il.DefineLabel();
-                c.Emit(OpCodes.Ldloc_0); // player is the first local var
-                c.Emit(OpCodes.Call, PlayerHooks.isZombie);
-                c.Emit(OpCodes.Brfalse_S, vanilla);
-                c.Emit(OpCodes.Pop);
-                c.Emit(OpCodes.Ldc_I4, PlayerHooks.zombieInventorySize);
-                c.MarkLabel(vanilla);
-            }
+            ILCursor c = new(il);
+            c.GotoNext(MoveType.After, i => i.MatchLdcI4(50));
+            ILLabel vanilla = il.DefineLabel();
+            c.Emit(OpCodes.Call, PlayerHooks.getConfig);
+            c.Emit(OpCodes.Call, PlayerHooks.ZombiesHaveSmallerInventories);
+            c.Emit(OpCodes.Brfalse_S, vanilla);
+            c.Emit(OpCodes.Ldloc_0); // player is the first local var
+            c.Emit(OpCodes.Call, PlayerHooks.isZombie);
+            c.Emit(OpCodes.Brfalse_S, vanilla);
+            c.Emit(OpCodes.Pop);
+            c.Emit(OpCodes.Ldc_I4, PlayerHooks.zombieInventorySize);
+            c.MarkLabel(vanilla);
         } catch (Exception e) {
             DumpIL(il);
             throw new ILPatchFailureException(Mod, il, e);

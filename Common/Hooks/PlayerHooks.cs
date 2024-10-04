@@ -1,4 +1,5 @@
-﻿using Mono.Cecil.Cil;
+﻿using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using System;
@@ -19,6 +20,12 @@ public class PlayerHooks : ModHook {
     public static readonly FieldInfo netMode = typeof(Main).GetField("netMode", BindingFlags.Public | BindingFlags.Static);
     public static readonly FieldInfo active = typeof(Player).GetField("active", BindingFlags.Public | BindingFlags.Instance);
     public static readonly FieldInfo hostile = typeof(Player).GetField("hostile", BindingFlags.Public | BindingFlags.Instance);
+
+    // config
+    public static readonly MethodInfo getConfig = typeof(ZombieApocalypseConfig).GetMethod("GetInstance", BindingFlags.Public | BindingFlags.Static, []);
+    public static readonly MethodInfo ZombiesHaveSmallerInventories = typeof(ZombieApocalypseConfig).GetMethod("get_ZombiesHaveSmallerInventories", BindingFlags.Public | BindingFlags.Instance);
+    public static readonly MethodInfo ZombiesCanUseAmmoAndCoinSlots = typeof(ZombieApocalypseConfig).GetMethod("get_ZombiesCanUseAmmoAndCoinSlots", BindingFlags.Public | BindingFlags.Instance);
+    public static readonly MethodInfo ZombiesCanFightOtherPlayersWithoutPvP = typeof(ZombieApocalypseConfig).GetMethod("get_ZombiesCanFightOtherPlayersWithoutPvP", BindingFlags.Public | BindingFlags.Instance);
 
     private static ILHook autoSelectHook;
 
@@ -280,28 +287,44 @@ public class PlayerHooks : ModHook {
 
     private void QuickHeal_GetItemToUse(ILContext il) { // needs voidbag support
         try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) {
-                ILCursor c = new(il);
-                c.GotoNext(i => i.MatchLdcI4(0),
-                    i => i.MatchStloc(4));
-                c.GotoNext(i => i.MatchLdcI4(0));
-                ILLabel vanilla = il.DefineLabel();
-                c.Emit(OpCodes.Ldarg_0); // load player var
-                c.Emit(OpCodes.Call, isZombie);
-                c.Emit(OpCodes.Brfalse_S, vanilla);
-                c.Emit(OpCodes.Ldc_I4, zombieInventorySize); // muahahaha
-                c.Emit(OpCodes.Stloc_3);
-                c.MarkLabel(vanilla);
-            }
+            ILCursor c = new(il);
+            c.GotoNext(i => i.MatchLdcI4(0),
+                i => i.MatchStloc(4));
+            c.GotoNext(i => i.MatchLdcI4(0));
+            ILLabel vanilla = il.DefineLabel();
+            c.Emit(OpCodes.Call, getConfig);
+            c.Emit(OpCodes.Call, ZombiesHaveSmallerInventories);
+            c.Emit(OpCodes.Brfalse_S, vanilla);
+            c.Emit(OpCodes.Ldarg_0); // load player var
+            c.Emit(OpCodes.Call, isZombie);
+            c.Emit(OpCodes.Brfalse_S, vanilla);
+            c.Emit(OpCodes.Ldc_I4, zombieInventorySize); // muahahaha
+            c.Emit(OpCodes.Stloc_3);
+            c.MarkLabel(vanilla);
         } catch (Exception e) {
             DumpIL(il);
             throw new ILPatchFailureException(Mod, il, e);
         }
     }
 
-    public static void ReplaceDefaultInventorySize(ILCursor c, ILContext il, int size = inventorySize, int newSize = zombieInventorySize) {
+    public static void ReplaceDefaultInventorySize(ILCursor c, ILContext il, int size = inventorySize, int newSize = zombieInventorySize, bool checkAmmoToo = false) {
         c.GotoNext(MoveType.After, i => i.MatchLdcI4(size));
         ILLabel vanilla = il.DefineLabel();
+        if (checkAmmoToo) {
+            ILLabel modded = il.DefineLabel();
+            c.Emit(OpCodes.Call, getConfig);
+            c.Emit(OpCodes.Call, ZombiesCanUseAmmoAndCoinSlots);
+            c.Emit(OpCodes.Brfalse_S, modded);
+            c.Emit(OpCodes.Call, getConfig);
+            c.Emit(OpCodes.Call, ZombiesHaveSmallerInventories);
+            c.Emit(OpCodes.Brtrue_S, modded);
+            c.Emit(OpCodes.Br_S, vanilla);
+            c.MarkLabel(modded);
+        } else {
+            c.Emit(OpCodes.Call, getConfig);
+            c.Emit(OpCodes.Call, ZombiesHaveSmallerInventories);
+            c.Emit(OpCodes.Brfalse_S, vanilla);
+        }
         c.Emit(OpCodes.Ldarg_0);
         c.Emit(OpCodes.Call, isZombie);
         c.Emit(OpCodes.Brfalse_S, vanilla);
@@ -312,8 +335,7 @@ public class PlayerHooks : ModHook {
 
     private void QuickMana_GetItemToUse(ILContext il) {
         try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories)
-                ReplaceDefaultInventorySize(new(il), il);
+            ReplaceDefaultInventorySize(new(il), il);
         } catch (Exception e) {
             DumpIL(il);
             throw new ILPatchFailureException(Mod, il, e);
@@ -322,11 +344,9 @@ public class PlayerHooks : ModHook {
 
     private void QuickStackAllChests(ILContext il) {
         try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) {
-                ILCursor c = new(il);
-                for (int _ = 0; _ < 2; _++)
-                    ReplaceDefaultInventorySize(c, il, 50);
-            }
+            ILCursor c = new(il);
+            for (int _ = 0; _ < 2; _++)
+                ReplaceDefaultInventorySize(c, il, 50);
         } catch (Exception e) {
             DumpIL(il);
             throw new ILPatchFailureException(Mod, il, e);
@@ -335,156 +355,18 @@ public class PlayerHooks : ModHook {
 
     private void ScrollHotbar(ILContext il) {
         try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) {
-                ILCursor c = new(il);
-                ReplaceDefaultInventorySize(c, il, 9, zombieInventorySize - 1);
-                for (int _ = 0; _ < 2; _++) { // do twice
-                    if (_ == 0) // why is it compiled like this
-                        c.GotoPrev(MoveType.After, i => i.MatchLdcI4(10));
-                    else
-                        c.GotoNext(MoveType.After, i => i.MatchLdcI4(10));
-                    ILLabel vanilla2 = il.DefineLabel();
-                    c.Emit(OpCodes.Ldarg_0);
-                    c.Emit(OpCodes.Call, isZombie);
-                    c.Emit(OpCodes.Brfalse_S, vanilla2);
-                    c.Emit(OpCodes.Pop);
-                    c.Emit(OpCodes.Ldc_I4, zombieInventorySize);
-                    c.MarkLabel(vanilla2);
-                }
-            }
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void FindPaintOrCoating(ILContext il) {
-        try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) {
-                ILCursor c = new(il);
-                for (int _ = 0; _ < 2; _++)
-                    ReplaceDefaultInventorySize(c, il);
-            }
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void Fishing_GetBait(ILContext il) {
-        try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) {
-                ILCursor c = new(il);
-                ReplaceDefaultInventorySize(c, il);
-                ReplaceDefaultInventorySize(c, il, 50);
-            }
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void GetBestPickaxe(ILContext il) {
-        try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories)
-                ReplaceDefaultInventorySize(new(il), il, 50);
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void ChooseAmmo(ILContext il) {
-        try {
-            if (!ZombieApocalypseConfig.GetInstance(out var cfg).ZombiesCanUseAmmoAndCoinSlots || !cfg.ZombiesHaveSmallerInventories) {
-                ILCursor c = new(il);
-                ReplaceDefaultInventorySize(c, il, 50, 0);
-                ReplaceDefaultInventorySize(c, il, 4, zombieInventorySize);
-                ReplaceDefaultInventorySize(c, il, 58, zombieInventorySize);
-            }
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void ConsumeItem(ILContext il) {
-        try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) {
-                ILCursor c = new(il);
-                ReplaceDefaultInventorySize(c, il);
-                ReplaceDefaultInventorySize(c, il, 57, 3);
-            }
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void DoCoins(ILContext il) {
-        try {
-            if (!ZombieApocalypseConfig.GetInstance(out var cfg).ZombiesCanUseAmmoAndCoinSlots || !cfg.ZombiesHaveSmallerInventories)
-                ReplaceDefaultInventorySize(new(il), il, 54);
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void ItemCheck_Inner(ILContext il) {
-        try {
-            if (ZombieApocalypseConfig.GetInstance(out var cfg).ZombiesHaveSmallerInventories)
-                ReplaceDefaultInventorySize(new(il), il);
-            if (!cfg.ZombiesCanUseAmmoAndCoinSlots || !cfg.ZombiesHaveSmallerInventories)
-                ReplaceDefaultInventorySize(new(il), il, 54);
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void ItemSpace(ILContext il) {
-        try {
-            if (ZombieApocalypseConfig.GetInstance(out var cfg).ZombiesHaveSmallerInventories)
-                ReplaceDefaultInventorySize(new(il), il, 50);
-            if (!cfg.ZombiesCanUseAmmoAndCoinSlots || !cfg.ZombiesHaveSmallerInventories)
-                ReplaceDefaultInventorySize(new(il), il, 54);
-            if (cfg.ZombiesHaveSmallerInventories)
-                for (int _ = 0; _ < 2; _++)
-                    ReplaceDefaultInventorySize(new(il), il);
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void RefreshInfoAccs(ILContext il) {
-        try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories)
-                ReplaceDefaultInventorySize(new(il), il);
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void UpdateEquips(ILContext il) {
-        try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories)
-                ReplaceDefaultInventorySize(new(il), il);
-        } catch (Exception e) {
-            DumpIL(il);
-            throw new ILPatchFailureException(Mod, il, e);
-        }
-    }
-
-    private void AutoSelect(ILContext il) {
-        try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesHaveSmallerInventories) {
-                ILCursor c = new(il);
-                c.GotoNext(MoveType.After, i => i.MatchLdcI4(50));
+            ILCursor c = new(il);
+            ReplaceDefaultInventorySize(c, il, 9, zombieInventorySize - 1);
+            for (int _ = 0; _ < 2; _++) { // do twice
+                if (_ == 0) // why is it compiled like this
+                    c.GotoPrev(MoveType.After, i => i.MatchLdcI4(10));
+                else
+                    c.GotoNext(MoveType.After, i => i.MatchLdcI4(10));
                 ILLabel vanilla = il.DefineLabel();
-                c.Emit(OpCodes.Ldarg_2); // player is passed into TileLoader.AutoSelect as the third argument
+                c.Emit(OpCodes.Call, getConfig);
+                c.Emit(OpCodes.Call, ZombiesHaveSmallerInventories);
+                c.Emit(OpCodes.Brfalse_S, vanilla);
+                c.Emit(OpCodes.Ldarg_0);
                 c.Emit(OpCodes.Call, isZombie);
                 c.Emit(OpCodes.Brfalse_S, vanilla);
                 c.Emit(OpCodes.Pop);
@@ -497,33 +379,157 @@ public class PlayerHooks : ModHook {
         }
     }
 
+    private void FindPaintOrCoating(ILContext il) {
+        try {
+            ILCursor c = new(il);
+            for (int _ = 0; _ < 2; _++)
+                ReplaceDefaultInventorySize(c, il);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void Fishing_GetBait(ILContext il) {
+        try {
+            ILCursor c = new(il);
+            ReplaceDefaultInventorySize(c, il);
+            ReplaceDefaultInventorySize(c, il, 50);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void GetBestPickaxe(ILContext il) {
+        try {
+            ReplaceDefaultInventorySize(new(il), il, 50);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void ChooseAmmo(ILContext il) {
+        try {
+            ILCursor c = new(il);
+            ReplaceDefaultInventorySize(c, il, 50, 0, true);
+            ReplaceDefaultInventorySize(c, il, 4, zombieInventorySize, true);
+            ReplaceDefaultInventorySize(c, il, 58, zombieInventorySize, true);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void ConsumeItem(ILContext il) {
+        try {
+            ILCursor c = new(il);
+            ReplaceDefaultInventorySize(c, il);
+            ReplaceDefaultInventorySize(c, il, 57, 3);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void DoCoins(ILContext il) {
+        try {
+            ReplaceDefaultInventorySize(new(il), il, 54, zombieInventorySize, true);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void ItemCheck_Inner(ILContext il) {
+        try {
+            ReplaceDefaultInventorySize(new(il), il);
+            ReplaceDefaultInventorySize(new(il), il, 54, zombieInventorySize, true);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void ItemSpace(ILContext il) {
+        try {
+            ILCursor c = new(il);
+            ReplaceDefaultInventorySize(c, il, 50);
+            ReplaceDefaultInventorySize(c, il, 54, zombieInventorySize, true);
+            for (int _ = 0; _ < 2; _++)
+                ReplaceDefaultInventorySize(c, il);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void RefreshInfoAccs(ILContext il) {
+        try {
+            ReplaceDefaultInventorySize(new(il), il);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void UpdateEquips(ILContext il) {
+        try {
+            ReplaceDefaultInventorySize(new(il), il);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void AutoSelect(ILContext il) {
+        try {
+            ILCursor c = new(il);
+            c.GotoNext(MoveType.After, i => i.MatchLdcI4(50));
+            ILLabel vanilla = il.DefineLabel();
+            c.Emit(OpCodes.Call, getConfig);
+            c.Emit(OpCodes.Call, ZombiesHaveSmallerInventories);
+            c.Emit(OpCodes.Brfalse_S, vanilla);
+            c.Emit(OpCodes.Ldarg_2); // player is passed into TileLoader.AutoSelect as the third argument
+            c.Emit(OpCodes.Call, isZombie);
+            c.Emit(OpCodes.Brfalse_S, vanilla);
+            c.Emit(OpCodes.Pop);
+            c.Emit(OpCodes.Ldc_I4, zombieInventorySize);
+            c.MarkLabel(vanilla);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
     private void ItemCheck_MeleeHitPVP(ILContext il) {
         try {
-            if (ZombieApocalypseConfig.GetInstance().ZombiesCanFightOtherPlayersWithoutPvP) {
-                ILCursor c = new(il);
-                ILLabel t = null;
-                c.GotoNext(i => i.MatchLdarg0(),
-                    i => i.MatchLdfld(hostile),
-                    i => i.MatchBrtrue(out t));
-                c.Emit(OpCodes.Br_S, t);
-                c.GotoNext(MoveType.After, i => i.MatchLdloc1(),
-                    i => i.MatchLdfld(active),
-                    i => i.MatchBrfalse(out _));
-                ILLabel skipHostile = il.DefineLabel();
-                c.Emit(OpCodes.Ldarg_0);
-                c.Emit(OpCodes.Call, isZombie);
-                c.Emit(OpCodes.Ldloc_1);
-                c.Emit(OpCodes.Call, isZombie);
-                c.Emit(OpCodes.Bne_Un_S, skipHostile);
-                c.GotoNext(MoveType.After, i => i.MatchLdloc1(),
-                    i => i.MatchLdfld(hostile),
-                    i => i.MatchBrfalse(out t));
-                c.Emit(OpCodes.Ldarg_0);
-                c.Emit(OpCodes.Ldfld, hostile);
-                c.Emit(OpCodes.Brfalse, t);
-                c.MarkLabel(skipHostile);
-                DumpIL(il);
-            }
+            ILCursor c = new(il);
+            ILLabel t = null;
+            c.GotoNext(i => i.MatchLdarg0(),
+                i => i.MatchLdfld(hostile),
+                i => i.MatchBrtrue(out t));
+            c.Emit(OpCodes.Call, getConfig);
+            c.Emit(OpCodes.Call, ZombiesCanFightOtherPlayersWithoutPvP);
+            c.Emit(OpCodes.Brtrue_S, t);
+            c.GotoNext(MoveType.After, i => i.MatchLdloc1(),
+                i => i.MatchLdfld(active),
+                i => i.MatchBrfalse(out _));
+            ILLabel skipHostile = il.DefineLabel();
+            c.Emit(OpCodes.Ldarg_0);
+            c.Emit(OpCodes.Call, isZombie);
+            c.Emit(OpCodes.Ldloc_1);
+            c.Emit(OpCodes.Call, isZombie);
+            c.Emit(OpCodes.Bne_Un_S, skipHostile);
+            c.GotoNext(MoveType.After, i => i.MatchLdloc1(),
+                i => i.MatchLdfld(hostile),
+                i => i.MatchBrfalse(out t));
+            c.Emit(OpCodes.Ldarg_0);
+            c.Emit(OpCodes.Ldfld, hostile);
+            c.Emit(OpCodes.Brfalse, t);
+            c.MarkLabel(skipHostile);
+            DumpIL(il);
         } catch (Exception e) {
             DumpIL(il);
             throw new ILPatchFailureException(Mod, il, e);
