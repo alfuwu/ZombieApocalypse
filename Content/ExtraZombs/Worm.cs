@@ -5,6 +5,8 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria.GameContent;
 
 namespace ZombieApocalypse.Content.ExtraZombs;
 
@@ -522,6 +524,24 @@ public abstract class WormHead : Worm {
         if (((NPC.velocity.X > 0 && NPC.oldVelocity.X < 0) || (NPC.velocity.X < 0 && NPC.oldVelocity.X > 0) || (NPC.velocity.Y > 0 && NPC.oldVelocity.Y < 0) || (NPC.velocity.Y < 0 && NPC.oldVelocity.Y > 0)) && !NPC.justHit)
             NPC.netUpdate = true;
     }
+
+    public override bool? DrawHealthBar(byte hbPosition, ref float scale, ref Vector2 position) {
+        NPC nPC = NPC;
+        for (int i = NPC.whoAmI + 1; i < 200; i++) {
+            if (Main.npc[i].active && Main.npc[i].type == TailType) {
+                nPC = Main.npc[i];
+                break;
+            }
+        }
+
+        position = (NPC.position + nPC.position) / 2f;
+        return true;
+    }
+
+    public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
+        Main.EntitySpriteDraw(TextureAssets.Npc[Type].Value, NPC.Center - Main.screenPosition, null, NPC.GetAlpha(Lighting.GetColor((int)NPC.Center.X / 16, (int)NPC.Center.Y / 16)), NPC.rotation, TextureAssets.Npc[Type].Size() * 0.5f, NPC.scale, SpriteEffects.None, 0);
+        return false;
+    }
 }
 
 public abstract class WormBody : Worm {
@@ -571,6 +591,11 @@ public abstract class WormBody : Worm {
             worm.NPC.position.Y += posY;
         }
     }
+
+    public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
+        Main.EntitySpriteDraw(TextureAssets.Npc[Type].Value, NPC.Center - Main.screenPosition, null, NPC.GetAlpha(Lighting.GetColor((int)NPC.Center.X / 16, (int)NPC.Center.Y / 16)), NPC.rotation, TextureAssets.Npc[Type].Size() * 0.5f, NPC.scale, SpriteEffects.None, 0);
+        return false;
+    }
 }
 
 // Since the body and tail segments share the same AI
@@ -579,5 +604,10 @@ public abstract class WormTail : Worm {
 
     internal override void BodyTailAI() {
         WormBody.CommonAI_BodyTail(this);
+    }
+
+    public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
+        Main.EntitySpriteDraw(TextureAssets.Npc[Type].Value, NPC.Center - Main.screenPosition, null, NPC.GetAlpha(Lighting.GetColor((int)NPC.Center.X / 16, (int)NPC.Center.Y / 16)), NPC.rotation, TextureAssets.Npc[Type].Size() * 0.5f, NPC.scale, SpriteEffects.None, 0);
+        return false;
     }
 }

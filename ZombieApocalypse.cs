@@ -26,8 +26,10 @@ namespace ZombieApocalypse {
             string msgType = (string)args[0];
             switch (msgType) {
                 case "Zombify":
-                    ((Player)args[0]).SetZombie((bool)args[1]);
+                    ((Player)args[1]).SetZombie((bool)args[2]);
                     break;
+                case "IsZombie":
+                    return ((Player)args[1]).IsZombie();
                 default:
                     break;
             }
@@ -75,6 +77,9 @@ namespace ZombieApocalypse {
 
         [DefaultValue(true)]
         public bool HostileNPCsAreMostlyFriendlyToZombies { get; set; }
+
+        [DefaultValue(false)]
+        public bool ZombiesAreImmuneToHostileProjectiles { get; set; }
 
         [DefaultValue(false)]
         public bool UnzombifyPlayersOnDeath { get; set; }

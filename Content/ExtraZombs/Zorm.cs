@@ -13,9 +13,9 @@ public class ZormHead : WormHead {
     public override void SetStaticDefaults() {
         NPCID.Sets.NPCBestiaryDrawModifiers drawModifier = new() { 
             CustomTexturePath = Texture.Replace("Head", "_Bestiary"),
-            Position = new(40f, 24f),
+            Position = new(2f, 24f),
             PortraitPositionXOverride = 0f,
-            PortraitPositionYOverride = 12f
+            PortraitPositionYOverride = 10f
         };
         NPCID.Sets.NPCBestiaryDrawOffset.Add(NPC.type, drawModifier);
         NPCID.Sets.Zombies[Type] = true;
@@ -24,6 +24,11 @@ public class ZormHead : WormHead {
     public override void SetDefaults() {
         NPC.CloneDefaults(NPCID.GiantWormHead);
         NPC.aiStyle = -1;
+        NPC.damage = 8;
+        NPC.defense = 0;
+        NPC.lifeMax = 30;
+        NPC.value = 40f;
+        NPC.knockBackResist = 0f;
     }
 
     public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry) {
@@ -62,6 +67,11 @@ internal class ZormBody : WormBody {
     public override void SetDefaults() {
         NPC.CloneDefaults(NPCID.GiantWormBody);
         NPC.aiStyle = -1;
+        NPC.damage = 4;
+        NPC.defense = 4;
+        NPC.lifeMax = 30;
+        NPC.value = 40f;
+        NPC.knockBackResist = 0f;
     }
 
     public override void Init() => ZormHead.CommonWormInit(this);
@@ -78,6 +88,11 @@ internal class ZormTail : WormTail {
     public override void SetDefaults() {
         NPC.CloneDefaults(NPCID.GiantWormTail);
         NPC.aiStyle = -1;
+        NPC.damage = 4;
+        NPC.defense = 6;
+        NPC.lifeMax = 30;
+        NPC.value = 40f;
+        NPC.knockBackResist = 0f;
     }
 
     public override void Init() => ZormHead.CommonWormInit(this);

@@ -9,12 +9,12 @@ namespace ZombieApocalypse.Common.Extensions;
 
 public static class ModNPCExtensions {
     // stripped down Fighter AI code
-    public static void BasicFighterAI(this ModNPC modNPC, bool runAwayInDaylight = true) {
+    public static void BasicFighterAI(this ModNPC modNPC, bool runAwayInDaylight = true, int ambientSoundChance = 1000, SoundStyle? ambientSound = null) {
+        ambientSound ??= SoundID.NPCHit14;
         if (Main.player[modNPC.NPC.target].position.Y + Main.player[modNPC.NPC.target].height == modNPC.NPC.position.Y + modNPC.NPC.height)
             modNPC.NPC.directionY = -1;
 
         bool flag = false;
-
         bool flag5 = false;
         bool flag6 = false;
         if (modNPC.NPC.velocity.X == 0f)
@@ -52,14 +52,14 @@ public static class ModNPCExtensions {
 
 
         if (modNPC.NPC.ai[3] < num56 && (NPC.DespawnEncouragement_AIStyle3_Fighters_NotDiscouraged(modNPC.NPC.type, modNPC.NPC.position, modNPC.NPC) || !runAwayInDaylight)) {
-            if (modNPC.NPC.shimmerTransparency < 1f)
-                SoundEngine.PlaySound(SoundID.NPCHit14, new(modNPC.NPC.position.X, modNPC.NPC.position.Y));
+            if (modNPC.NPC.shimmerTransparency < 1f && Main.rand.NextBool(ambientSoundChance))
+                SoundEngine.PlaySound(ambientSound, new(modNPC.NPC.position.X, modNPC.NPC.position.Y));
 
             modNPC.NPC.TargetClosest();
             if (modNPC.NPC.directionY > 0 && Main.player[modNPC.NPC.target].Center.Y <= modNPC.NPC.Bottom.Y)
                 modNPC.NPC.directionY = -1;
         } else if (!(modNPC.NPC.ai[2] > 0f) || !NPC.DespawnEncouragement_AIStyle3_Fighters_CanBeBusyWithAction(modNPC.NPC.type)) {
-            if (Main.IsItDay() && (double)(modNPC.NPC.position.Y / 16f) < Main.worldSurface)
+            if (Main.IsItDay() && (double)(modNPC.NPC.position.Y / 16f) < Main.worldSurface && runAwayInDaylight)
                 modNPC.NPC.EncourageDespawn(10);
 
             if (modNPC.NPC.velocity.X == 0f) {
@@ -147,8 +147,6 @@ public static class ModNPCExtensions {
                     if (num191 < vector39.Y + modNPC.NPC.height) {
                         float num192 = vector39.Y + modNPC.NPC.height - num191;
                         float num193 = 16.1f;
-                        if (modNPC.NPC.type == 163 || modNPC.NPC.type == 164 || modNPC.NPC.type == 236 || modNPC.NPC.type == 239 || modNPC.NPC.type == 530)
-                            num193 += 8f;
 
                         if (num192 <= num193) {
                             modNPC.NPC.gfxOffY += modNPC.NPC.position.Y + modNPC.NPC.height - num191;
@@ -272,17 +270,36 @@ public static class ModNPCExtensions {
             modNPC.NPC.ai[1] = 0f;
             modNPC.NPC.ai[2] = 0f;
         }
+    }
 
-        if (Main.netMode != 1 && modNPC.NPC.type == 120 && modNPC.NPC.ai[3] >= num56) {
-            int targetTileX = (int)Main.player[modNPC.NPC.target].Center.X / 16;
-            int targetTileY = (int)Main.player[modNPC.NPC.target].Center.Y / 16;
-            Vector2 chosenTile = Vector2.Zero;
-            if (modNPC.NPC.AI_AttemptToFindTeleportSpot(ref chosenTile, targetTileX, targetTileY, 20, 9)) {
-                modNPC.NPC.position.X = chosenTile.X * 16f - (modNPC.NPC.width / 2);
-                modNPC.NPC.position.Y = chosenTile.Y * 16f - modNPC.NPC.height;
-                modNPC.NPC.ai[3] = -120f;
-                modNPC.NPC.netUpdate = true;
-            }
+    public static void BasicFighterFrame(this ModNPC modNPC, int frameHeight) {
+        if (modNPC.NPC.velocity.Y == 0f) {
+            if (modNPC.NPC.direction == 1)
+                modNPC.NPC.spriteDirection = 1;
+
+            if (modNPC.NPC.direction == -1)
+                modNPC.NPC.spriteDirection = -1;
         }
+        if (modNPC.NPC.velocity.Y != 0f || (modNPC.NPC.direction == -1 && modNPC.NPC.velocity.X > 0f) || (modNPC.NPC.direction == 1 && modNPC.NPC.velocity.X < 0f)) {
+            modNPC.NPC.frameCounter = 0.0;
+            modNPC.NPC.frame.Y = frameHeight * 2;
+            return;
+        }
+        if (modNPC.NPC.velocity.X == 0f) {
+            modNPC.NPC.frameCounter = 0.0;
+            modNPC.NPC.frame.Y = 0;
+            return;
+        }
+        modNPC.NPC.frameCounter += Math.Abs(modNPC.NPC.velocity.X);
+        if (modNPC.NPC.frameCounter < 8.0)
+            modNPC.NPC.frame.Y = 0;
+        else if (modNPC.NPC.frameCounter < 16.0)
+            modNPC.NPC.frame.Y = frameHeight;
+        else if (modNPC.NPC.frameCounter < 24.0)
+            modNPC.NPC.frame.Y = frameHeight * 2;
+        else if (modNPC.NPC.frameCounter < 32.0)
+            modNPC.NPC.frame.Y = frameHeight;
+        else
+            modNPC.NPC.frameCounter = 0.0;
     }
 }

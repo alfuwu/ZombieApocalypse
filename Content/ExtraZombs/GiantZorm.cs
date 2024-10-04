@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Terraria;
+﻿using Terraria;
 using Terraria.GameContent.Bestiary;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -25,6 +24,11 @@ public class GiantZormHead : WormHead {
     public override void SetDefaults() {
         NPC.CloneDefaults(NPCID.DiggerHead);
         NPC.aiStyle = -1;
+        NPC.damage = 45;
+        NPC.defense = 10;
+        NPC.lifeMax = 200;
+        NPC.value = 300f;
+        NPC.knockBackResist = 0f;
     }
 
     public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry) {
@@ -62,6 +66,11 @@ public class GiantZormBody : WormBody {
     public override void SetDefaults() {
         NPC.CloneDefaults(NPCID.DiggerBody);
         NPC.aiStyle = -1;
+        NPC.damage = 28;
+        NPC.defense = 20;
+        NPC.lifeMax = 200;
+        NPC.value = 300f;
+        NPC.knockBackResist = 0f;
     }
 
     public override void Init() => GiantZormHead.CommonWormInit(this);
@@ -78,6 +87,11 @@ public class GiantZormTail : WormTail {
     public override void SetDefaults() {
         NPC.CloneDefaults(NPCID.DiggerTail);
         NPC.aiStyle = -1;
+        NPC.damage = 26;
+        NPC.defense = 30;
+        NPC.lifeMax = 200;
+        NPC.value = 300f;
+        NPC.knockBackResist = 0f;
     }
 
     public override void Init() => GiantZormHead.CommonWormInit(this);

@@ -28,7 +28,7 @@ public class ZombifiablePlayer : ModPlayer {
 
     public override bool CanBeHitByNPC(NPC npc, ref int cooldownSlot) => !ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies || !Zombified || npc.target == Player.whoAmI;
 
-    public override bool CanBeHitByProjectile(Projectile proj) => !ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies || !Zombified || (proj.TryGetOwner(out Player p) && p.InOpposingTeam(Player));
+    public override bool CanBeHitByProjectile(Projectile proj) => !ZombieApocalypseConfig.GetInstance().ZombiesAreImmuneToHostileProjectiles || !Zombified || (proj.TryGetOwner(out Player p) && p.InOpposingTeam(Player));
 
     public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genDust, ref PlayerDeathReason damageSource) {
         if (!Zombified && Player.IsZombifiableDeath(damageSource)) {
@@ -53,7 +53,7 @@ public class ZombifiablePlayer : ModPlayer {
         }
     }
 
-    public override bool CanHitNPC(NPC target) =>  !ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies || !Zombified || (Zombified && target.friendly) || target.target == Player.whoAmI;
+    public override bool CanHitNPC(NPC target) => !ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies || !Zombified || (Zombified && target.friendly) || target.target == Player.whoAmI;
 
     public override void SaveData(TagCompound tag) {
         tag["SkinColor"] = OriginalSkinColor;

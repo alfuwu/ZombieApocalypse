@@ -54,8 +54,8 @@ public class ZoNPC : GlobalNPC { // dont question the name, i couldnt think of a
     }
 
     public override void OnSpawn(NPC npc, IEntitySource source) {
-        if ((source is not EntitySource_Misc misc || misc.Context != "ZombieApocalypse") && ZombieApocalypseConfig.GetInstance().MoreZomb)
-            for (int _ = 0; _ < 2 + Main.rand.Next(2); _++)
+        if (source is not EntitySource_Misc && ZombieApocalypseConfig.GetInstance().MoreZomb)
+            for (int _ = 0; _ < 1 + Main.rand.Next(2); _++)
                 TrySpawn(npc);
     }
 
