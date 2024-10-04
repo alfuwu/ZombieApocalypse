@@ -17,6 +17,8 @@ public class PlayerHooks : ModHook {
     public const int defaultMaxAccSlots = 8;
     public static readonly MethodInfo isZombie = typeof(PlayerExtensions).GetMethod("IsZombie", BindingFlags.Public | BindingFlags.Static);
     public static readonly FieldInfo netMode = typeof(Main).GetField("netMode", BindingFlags.Public | BindingFlags.Static);
+    public static readonly FieldInfo active = typeof(Player).GetField("active", BindingFlags.Public | BindingFlags.Instance);
+    public static readonly FieldInfo hostile = typeof(Player).GetField("hostile", BindingFlags.Public | BindingFlags.Instance);
 
     private static ILHook autoSelectHook;
 
@@ -37,6 +39,7 @@ public class PlayerHooks : ModHook {
         IL_Player.GetBestPickaxe += GetBestPickaxe;
         IL_Player.HasItem_int += QuickMana_GetItemToUse;
         IL_Player.ItemCheck_Inner += ItemCheck_Inner;
+        IL_Player.ItemCheck_MeleeHitPVP += ItemCheck_MeleeHitPVP;
         IL_Player.ItemSpace += ItemSpace;
         IL_Player.PutItemInInventoryFromItemUsage += QuickMana_GetItemToUse;
         IL_Player.QuickHeal_GetItemToUse += QuickHeal_GetItemToUse;
@@ -80,6 +83,7 @@ public class PlayerHooks : ModHook {
         IL_Player.GetBestPickaxe -= GetBestPickaxe;
         IL_Player.HasItem_int -= QuickMana_GetItemToUse;
         IL_Player.ItemCheck_Inner -= ItemCheck_Inner;
+        IL_Player.ItemCheck_MeleeHitPVP -= ItemCheck_MeleeHitPVP;
         IL_Player.ItemSpace -= ItemSpace;
         IL_Player.PutItemInInventoryFromItemUsage -= QuickMana_GetItemToUse;
         IL_Player.QuickHeal_GetItemToUse -= QuickHeal_GetItemToUse;
@@ -486,6 +490,39 @@ public class PlayerHooks : ModHook {
                 c.Emit(OpCodes.Pop);
                 c.Emit(OpCodes.Ldc_I4, zombieInventorySize);
                 c.MarkLabel(vanilla);
+            }
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void ItemCheck_MeleeHitPVP(ILContext il) {
+        try {
+            if (ZombieApocalypseConfig.GetInstance().ZombiesCanFightOtherPlayersWithoutPvP) {
+                ILCursor c = new(il);
+                ILLabel t = null;
+                c.GotoNext(i => i.MatchLdarg0(),
+                    i => i.MatchLdfld(hostile),
+                    i => i.MatchBrtrue(out t));
+                c.Emit(OpCodes.Br_S, t);
+                c.GotoNext(MoveType.After, i => i.MatchLdloc1(),
+                    i => i.MatchLdfld(active),
+                    i => i.MatchBrfalse(out _));
+                ILLabel skipHostile = il.DefineLabel();
+                c.Emit(OpCodes.Ldarg_0);
+                c.Emit(OpCodes.Call, isZombie);
+                c.Emit(OpCodes.Ldloc_1);
+                c.Emit(OpCodes.Call, isZombie);
+                c.Emit(OpCodes.Bne_Un_S, skipHostile);
+                c.GotoNext(MoveType.After, i => i.MatchLdloc1(),
+                    i => i.MatchLdfld(hostile),
+                    i => i.MatchBrfalse(out t));
+                c.Emit(OpCodes.Ldarg_0);
+                c.Emit(OpCodes.Ldfld, hostile);
+                c.Emit(OpCodes.Brfalse, t);
+                c.MarkLabel(skipHostile);
+                DumpIL(il);
             }
         } catch (Exception e) {
             DumpIL(il);

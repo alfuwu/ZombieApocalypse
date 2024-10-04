@@ -64,6 +64,7 @@ namespace ZombieApocalypse {
         public bool ZombiesCanTradeWithNPCs { get; set; }
 
         [DefaultValue(true)]
+        [ReloadRequired]
         public bool ZombiesCanFightOtherPlayersWithoutPvP { get; set; }
 
         [DefaultValue(true)]
