@@ -22,9 +22,9 @@ public class MessageBufferHooks : ModHook {
     private void GetData(ILContext il) {
         try {
             ILCursor c = new(il);
-            c.GotoNext(i => i.MatchLdelemRef(),
+            c.GotoNext(MoveType.After, i => i.MatchLdelemRef(),
                 i => i.MatchLdfld(PlayerHooks.hostile),
-                i => i.MatchBrfalse(out _));
+                i => i.MatchBrfalse(out _)); // oh my god it was matching this twice
             c.GotoNext(MoveType.After, i => i.MatchLdfld(PlayerHooks.hostile),
                 i => i.MatchBrfalse(out _));
             ILLabel skipHostile = il.DefineLabel();
@@ -43,8 +43,6 @@ public class MessageBufferHooks : ModHook {
             c.Emit(OpCodes.Ldelem_Ref);
             c.Emit(OpCodes.Call, PlayerHooks.isZombie);
             c.Emit(OpCodes.Bne_Un, skipHostile); // if the two players are zombie and human, skip the hostile check
-            DumpIL(il);
-            // why does this not work?
         } catch (Exception e) {
             DumpIL(il);
             throw new ILPatchFailureException(Mod, il, e);

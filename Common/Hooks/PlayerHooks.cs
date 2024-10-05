@@ -531,7 +531,6 @@ public class PlayerHooks : ModHook {
             c.Emit(OpCodes.Ldfld, hostile);
             c.Emit(OpCodes.Brfalse, skipToEnd);
             c.MarkLabel(skipHostile);
-            DumpIL(il);
         } catch (Exception e) {
             DumpIL(il);
             throw new ILPatchFailureException(Mod, il, e);
