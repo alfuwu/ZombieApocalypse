@@ -19,7 +19,7 @@ public class Infection : ModCommand {
             for (int i = 0; i < Math.Min(players.Length, ZombieApocalypseConfig.GetInstance().InitialInfectionPlayers); i++) {
                 int infected = Main.rand.Next(players.Length);
                 players[infected].SetZombie(true);
-                ZombifiablePlayer.SendZombificationStatusChange(players[infected].whoAmI, true, true, false);
+                players[infected].SetFromInfection(true);
             }
         }
     }

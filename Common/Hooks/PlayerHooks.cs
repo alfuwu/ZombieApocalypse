@@ -253,7 +253,6 @@ public class PlayerHooks : ModHook {
         if (cfg.ZombifyPlayersOnRespawn && !self.IsZombie() && self.IsZombifiableDeath()) {
             self.statLife = self.statLifeMax / 2;
             self.SetZombie(true);
-            self.GetModPlayer<ZombifiablePlayer>().ClientHandleZombification();
             self.GetModPlayer<ZombifiablePlayer>().LastDeathReason = null;
         }
     }

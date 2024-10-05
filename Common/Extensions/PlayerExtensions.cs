@@ -1,5 +1,7 @@
-﻿using Terraria;
+﻿using Microsoft.Xna.Framework;
+using Terraria;
 using Terraria.DataStructures;
+using Terraria.Graphics.Effects;
 using Terraria.ID;
 
 namespace ZombieApocalypse.Common.Extensions;
@@ -7,16 +9,27 @@ namespace ZombieApocalypse.Common.Extensions;
 public static class PlayerExtensions {
     public static bool IsZombie(this Player player) => player.TryGetModPlayer(out ZombifiablePlayer plr) && plr.Zombified;
 
-    public static void SetZombie(this Player player, bool zombie) {
+    public static void SetZombie(this Player player, bool zombie, bool quiet = false) {
         ZombifiablePlayer p = player.GetModPlayer<ZombifiablePlayer>();
-        if (zombie)
+        if (zombie && p.OriginalSkinColor == new Color(0, 0, 0))
             p.OriginalSkinColor = player.skinColor;
         p.Zombified = zombie;
-        if (zombie && ZombieApocalypseConfig.GetInstance(out var cfg).ZombiesHaveADifferentSkinColor)
+        if (ZombieApocalypseConfig.GetInstance(out var cfg).ZombiesHaveADifferentSkinColor && zombie)
             player.skinColor = cfg.ZombieSkinColor;
-        else
+        else if (!quiet)
             player.skinColor = p.OriginalSkinColor;
+        if (player.whoAmI == Main.myPlayer) {
+            if (!quiet) {
+                if (cfg.ZombificationParticles && zombie)
+                    ZombifiablePlayer.ZombificationDusts(player);
+                p.BroadcastMessage(quiet, p.FromInfection);
+            }
+            if (cfg.ApplyCustomVisionShaderToZombies)
+                Filters.Scene[ZombieApocalypse.VisionShader].GetShader().UseIntensity(zombie ? 1 : -1);
+        }
     }
+
+    public static void SetFromInfection(this Player player, bool fromInfection) => player.GetModPlayer<ZombifiablePlayer>().FromInfection = fromInfection;
 
     public static bool IsZombifiableDeath(this Player player, PlayerDeathReason deathReason = null) {
         PlayerDeathReason damageSource = deathReason ?? player.GetModPlayer<ZombifiablePlayer>().LastDeathReason;

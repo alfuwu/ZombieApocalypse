@@ -2,6 +2,7 @@ PlayerZombified: "{0} has become a zombie!"
 PlayerZombifiedInfection: "{0} has become a zombie!"
 PlayerUnzombified: "{0} has returned to the living."
 PlayerUnzombifiedInfection: "{0} has returned to the living."
+ZombiesHaveWon: The zombies have won.
 
 Configs: {
 	ZombieApocalypseConfig: {
@@ -99,7 +100,7 @@ Configs: {
 
 		IncreaseZombieArmDropChance: {
 			Label: Increase Zombie Arm Drop Chance
-			Tooltip: Increases the chance for zombies to drop their arms
+			Tooltip: Increases the chance for zombies to drop their arms to 5% from 0.4% (note: also decreases the damage of Zombie Arms)
 		}
 
 		MoreZomb: {
@@ -169,7 +170,17 @@ Configs: {
 
 		ZombificationParticles: {
 			Label: Zombification Particles
-			Tooltip: Plays VFX and SFX when a player turns into a zombie
+			Tooltip: Plays some VFX and SFX when a player turns into a zombie
+		}
+
+		ZombiesWinWhenEveryoneIsZombie: {
+			Label: Zombies Win When Everyone is Zombified
+			Tooltip: Display a victory message for the zombies if all players in the world are a zombie
+		}
+
+		ZombiesAreFriendlyToZombies: {
+			Label: Zombies Are Friendly To Zombies
+			Tooltip: ""
 		}
 	}
 }

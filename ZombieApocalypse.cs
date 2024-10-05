@@ -3,8 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 using System.ComponentModel;
 using System.IO;
 using Terraria;
+using Terraria.Chat;
 using Terraria.Graphics.Effects;
-using Terraria.IO;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using ZombieApocalypse.Common;
@@ -38,13 +39,6 @@ public class ZombieApocalypse : Mod {
         return null;
     }
 
-    public override void Unload() {
-        if (ZombieApocalypseConfig.GetInstance(out _).ZombiesHaveADifferentSkinColor)
-            foreach (PlayerFileData d in Main.PlayerList)
-                if (d.Player.IsZombie())
-                    d.Player.skinColor = d.Player.GetModPlayer<ZombifiablePlayer>().OriginalSkinColor;
-    }
-
     internal enum MessageType : byte {
         Zombify
     }
@@ -54,7 +48,15 @@ public class ZombieApocalypse : Mod {
 
         switch (msgType) {
             case MessageType.Zombify:
-                ZombifiablePlayer.HandleZombification(reader, whoAmI);
+                byte p = reader.ReadByte();
+                ZombifiablePlayer zomb = Main.player[p].GetModPlayer<ZombifiablePlayer>();
+                bool fromInfection = reader.ReadBoolean();
+                bool quiet = reader.ReadBoolean();
+                zomb.ReceivePlayerSync(reader, fromInfection);
+                zomb.quiet = false; // i love hacky flags
+
+                if (Main.netMode == NetmodeID.Server)
+                    zomb.SyncPlayer(-1, whoAmI, false);
                 break;
             default:
                 Logger.WarnFormat("Unknown network message type: {0}", msgType);
@@ -88,6 +90,9 @@ public class ZombieApocalypseConfig : ModConfig { // so many bools...
 
     [DefaultValue(true)]
     public bool HostileNPCsAreMostlyFriendlyToZombies { get; set; }
+
+    [DefaultValue(true)]
+    public bool ZombiesAreFriendlyToZombies { get; set; }
 
     [DefaultValue(false)]
     public bool ZombiesAreImmuneToHostileProjectiles { get; set; }
@@ -155,7 +160,7 @@ public class ZombieApocalypseConfig : ModConfig { // so many bools...
     [DefaultValue(true)]
     public bool ZombifyPlayersOnRespawn { get; set; }
 
-    [DefaultValue(true)]
+    [DefaultValue(true)] // priority chaos
     public bool RespawnNewZombiesWhereTheyDied { get; set; }
 
     [DefaultValue(false)]
@@ -166,6 +171,9 @@ public class ZombieApocalypseConfig : ModConfig { // so many bools...
 
     [DefaultValue(true)]
     public bool ZombificationParticles { get; set; }
+
+    [DefaultValue(true)]
+    public bool ZombiesWinWhenEveryoneIsZombie { get; set; }
 
     public static ZombieApocalypseConfig GetInstance() => ModContent.GetInstance<ZombieApocalypseConfig>();
 
