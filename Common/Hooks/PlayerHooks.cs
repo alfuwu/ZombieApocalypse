@@ -62,6 +62,7 @@ public class PlayerHooks : ModHook {
         IL_Player.SmartSelect_PickToolForStrategy += GetBestPickaxe;
         autoSelectHook = new(typeof(TileLoader).GetMethod("AutoSelect", BindingFlags.Public | BindingFlags.Static), AutoSelect);
         autoSelectHook.Apply();
+        IL_Player.UpdateBuffs += UpdateBuffs;
         IL_Player.UpdateEquips += UpdateEquips;
         IL_Player.useVoidBag += QuickMana_GetItemToUse;
 
@@ -522,14 +523,50 @@ public class PlayerHooks : ModHook {
             c.Emit(OpCodes.Ldloc_1);
             c.Emit(OpCodes.Call, isZombie);
             c.Emit(OpCodes.Bne_Un_S, skipHostile);
+            ILLabel skipToEnd = il.DefineLabel();
             c.GotoNext(MoveType.After, i => i.MatchLdloc1(),
                 i => i.MatchLdfld(hostile),
-                i => i.MatchBrfalse(out t));
+                i => i.MatchBrfalse(out skipToEnd));
             c.Emit(OpCodes.Ldarg_0);
             c.Emit(OpCodes.Ldfld, hostile);
-            c.Emit(OpCodes.Brfalse, t);
+            c.Emit(OpCodes.Brfalse, skipToEnd);
             c.MarkLabel(skipHostile);
             DumpIL(il);
+        } catch (Exception e) {
+            DumpIL(il);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void UpdateBuffs(ILContext il) {
+        try {
+            ILCursor c = new(il);
+            c.GotoNext(i => i.MatchLdarg0(),
+                i => i.MatchLdfld(hostile),
+                i => i.MatchBrfalse(out _));
+            ILLabel t = il.DefineLabel();
+            c.Emit(OpCodes.Call, getConfig);
+            c.Emit(OpCodes.Call, ZombiesCanFightOtherPlayersWithoutPvP);
+            c.Emit(OpCodes.Brtrue_S, t);
+            c.GotoNext(i => i.MatchLdcI4(0));
+            c.MarkLabel(t);
+            c.GotoNext(i => i.MatchLdloc(11),
+                i => i.MatchLdfld(hostile),
+                i => i.MatchBrfalse(out _));
+            ILLabel skipHostile = il.DefineLabel();
+            c.Emit(OpCodes.Ldarg_0);
+            c.Emit(OpCodes.Call, isZombie);
+            c.Emit(OpCodes.Ldloc_S, (byte)11);
+            c.Emit(OpCodes.Call, isZombie);
+            c.Emit(OpCodes.Bne_Un_S, skipHostile);
+            ILLabel skipToEnd = il.DefineLabel();
+            c.GotoNext(MoveType.After, i => i.MatchLdloc(11),
+                i => i.MatchLdfld(hostile),
+                i => i.MatchBrfalse(out skipToEnd));
+            c.Emit(OpCodes.Ldarg_0);
+            c.Emit(OpCodes.Ldfld, hostile);
+            c.Emit(OpCodes.Brfalse, skipToEnd);
+            c.MarkLabel(skipHostile);
         } catch (Exception e) {
             DumpIL(il);
             throw new ILPatchFailureException(Mod, il, e);

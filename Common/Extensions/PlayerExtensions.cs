@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Terraria;
+﻿using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 
@@ -10,7 +9,7 @@ public static class PlayerExtensions {
 
     public static void SetZombie(this Player player, bool zombie) {
         ZombifiablePlayer p = player.GetModPlayer<ZombifiablePlayer>();
-        if (p.OriginalSkinColor == new Color(0, 0, 0) && zombie)
+        if (zombie)
             p.OriginalSkinColor = player.skinColor;
         p.Zombified = zombie;
         if (zombie && ZombieApocalypseConfig.GetInstance(out var cfg).ZombiesHaveADifferentSkinColor)

@@ -38,7 +38,7 @@ public class ZombifiablePlayer : ModPlayer {
             dust.noGravity = true;
             dust.fadeIn = 1.3f;
         }
-        SoundEngine.PlaySound(SoundID.NPCHit14, player.Center);
+        SoundEngine.PlaySound(SoundID.NPCHit14, player.Center); // too lazy to separate this into two config options
     }
 
     public override bool CanBeHitByNPC(NPC npc, ref int cooldownSlot) => !ZombieApocalypseConfig.GetInstance().HostileNPCsAreMostlyFriendlyToZombies || !Zombified || npc.target == Player.whoAmI;
@@ -84,10 +84,10 @@ public class ZombifiablePlayer : ModPlayer {
     }
 
     public void ClientHandleZombification(bool fromInfection = false) {
-        if (OriginalSkinColor == new Color(0, 0, 0) && Zombified) // simple double check if the player's skin color is pure black as insurance
+        if (Zombified)
             OriginalSkinColor = Player.skinColor;
         if ((ZombieApocalypseConfig.GetInstance(out var cfg).BroadcastZombificationText && Zombified) || cfg.BroadcastUnzombificationText)
-            Main.NewText(Language.GetTextValue($"{ZombieApocalypse.Localization}.Player{(Zombified ? "Zombified" : "Unzombified")}", Player.name), 50, 255, 130);
+            Main.NewText(Language.GetTextValue($"{ZombieApocalypse.Localization}.Player{(Zombified ?  "Zombified" : "Unzombified")}{(fromInfection ? "Infection" : "")}", Player.name), 50, 255, 130);
         if (Main.netMode == NetmodeID.MultiplayerClient)
             SendZombificationStatusChange(Player.whoAmI, Zombified, fromInfection);
         if (Zombified && cfg.ZombificationParticles)

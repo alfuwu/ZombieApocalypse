@@ -1,6 +1,7 @@
 PlayerZombified: "{0} has become a zombie!"
 PlayerZombifiedInfection: "{0} has become a zombie!"
 PlayerUnzombified: "{0} has returned to the living."
+PlayerUnzombifiedInfection: "{0} has returned to the living."
 
 Configs: {
 	ZombieApocalypseConfig: {
@@ -215,7 +216,7 @@ Bestiary: {
 	BucketZombie: This zombie took a larger hit to its intelligence than most others of its ilk, causing it to inexplicably think that buckets were, in fact, a great defensive option.
 	GiantZorm: A massive cousin of the zorm, these creatures, transformed further by the effects of ancient magicks, these beasts tunnel through the ground in search of living beings to consume.
 	ZombieBat: Zombified bats that flutter through the caves underneath the surface. La de da de daaaaaa...
-	ZombieEye: A servant of Chthulu that fell to the undead horde.
+	ZombieEye: A servant of Cthulhu that fell to the undead horde.
 	ZombieSlime: A slime ravaged by the undead horde. Blood permeates its gelatinous body.
 	ZombieWithGun: Commando zombies are elite undead that have retained enough of their dexterity to stay capable of using powerful guns as weaponry.
 	ZombifiedMummy: A mummy brought back to the land of the living as an undead abomination.
