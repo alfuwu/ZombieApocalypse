@@ -169,7 +169,7 @@ Configs: {
 
 		ZombificationParticles: {
 			Label: Zombification Particles
-			Tooltip: ""
+			Tooltip: Plays VFX and SFX when a player turns into a zombie
 		}
 	}
 }

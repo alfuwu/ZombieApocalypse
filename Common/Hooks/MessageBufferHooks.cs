@@ -31,6 +31,10 @@ public class MessageBufferHooks : ModHook {
             c.MarkLabel(skipHostile);
             c.GotoPrev(i => i.MatchLdsfld(player),
                 i => i.MatchLdloc(453)); // god why are there so many locals
+            ILLabel vanilla = il.DefineLabel();
+            c.Emit(OpCodes.Call, PlayerHooks.getConfig);
+            c.Emit(OpCodes.Call, PlayerHooks.ZombiesCanFightOtherPlayersWithoutPvP);
+            c.Emit(OpCodes.Brfalse_S, vanilla);
             c.Emit(OpCodes.Ldsfld, player);
             c.Emit(OpCodes.Ldloc, 453);
             c.Emit(OpCodes.Nop); // match stack size
@@ -43,6 +47,7 @@ public class MessageBufferHooks : ModHook {
             c.Emit(OpCodes.Ldelem_Ref);
             c.Emit(OpCodes.Call, PlayerHooks.isZombie);
             c.Emit(OpCodes.Bne_Un, skipHostile); // if the two players are zombie and human, skip the hostile check
+            c.MarkLabel(vanilla);
         } catch (Exception e) {
             DumpIL(il);
             throw new ILPatchFailureException(Mod, il, e);
