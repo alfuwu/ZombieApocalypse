@@ -18,8 +18,8 @@ public class Infection : ModCommand {
             Player[] players = Main.player.Where(p => p.active).ToArray();
             for (int i = 0; i < Math.Min(players.Length, ZombieApocalypseConfig.GetInstance().InitialInfectionPlayers); i++) {
                 int infected = Main.rand.Next(players.Length);
-                players[infected].SetZombie(true);
                 players[infected].SetFromInfection(true);
+                players[infected].SetZombie(true);
             }
         }
     }
