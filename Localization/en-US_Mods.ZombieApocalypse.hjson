@@ -179,8 +179,8 @@ Configs: {
 		}
 
 		ZombiesAreFriendlyToZombies: {
-			Label: Zombies Are Friendly To Zombies
-			Tooltip: ""
+			Label: Zombies Are Friendly to Zombies
+			Tooltip: Prevents zombified players from receiving contact damage from zombies at all
 		}
 	}
 }
