@@ -1,8 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Graphics.Effects;
 using Terraria.ID;
+using Terraria.ModLoader;
+using ZombieApocalypse.Common.Hooks;
 
 namespace ZombieApocalypse.Common.Extensions;
 
@@ -26,6 +30,19 @@ public static class PlayerExtensions {
             }
             if (cfg.ApplyCustomVisionShaderToZombies)
                 Filters.Scene[ZombieApocalypse.VisionShader].GetShader().UseIntensity(zombie ? 1 : -1);
+        }
+        if (cfg.DropUnusableItemsOnZombification && cfg.ZombiesHaveSmallerInventories && zombie) {
+            IEntitySource itemSource_Death = player.GetSource_Death();
+
+            for (int i = PlayerHooks.zombieInventorySize; i < 59; i++) {
+                if (player.inventory[i].stack > 0) {
+                    Item itemToDrop = player.inventory[i];
+                    if (itemToDrop.stack > 0)
+                        player.TryDroppingSingleItem(itemSource_Death, itemToDrop);
+                }
+
+                player.inventory[i].TurnToAir();
+            }
         }
     }
 

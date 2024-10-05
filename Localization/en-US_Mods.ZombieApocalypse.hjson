@@ -125,7 +125,7 @@ Configs: {
 
 		ZombiesHaveLessAccessories: {
 			Label: Zombies Have Less Accessories
-			Tooltip: Makes zombies only able to access the first two accessory slots (3 after consuming a Demon Heart, and 4 on master mode after consuming a Demon Heart)
+			Tooltip: Makes zombies only able to access the first two accessory slots (three if on master mode, and four if on expert or higher after consuming a Demon Heart)
 		}
 
 		ApplyCustomVisionShaderToZombies: {
