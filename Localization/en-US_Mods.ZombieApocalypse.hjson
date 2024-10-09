@@ -182,6 +182,11 @@ Configs: {
 			Label: Zombies Are Friendly to Zombies
 			Tooltip: Prevents zombified players from receiving contact damage from zombies at all
 		}
+
+		DisableZombification: {
+			Label: Disable Zombification
+			Tooltip: Prevents players from becoming zombies completely
+		}
 	}
 }
 
