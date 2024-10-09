@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using System.ComponentModel;
 using System.IO;
 using Terraria;
-using Terraria.Chat;
 using Terraria.Graphics.Effects;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -174,6 +173,9 @@ public class ZombieApocalypseConfig : ModConfig { // so many bools...
 
     [DefaultValue(true)]
     public bool ZombiesWinWhenEveryoneIsZombie { get; set; }
+
+    [DefaultValue(false)]
+    public bool DisableZombification { get; set; }
 
     public static ZombieApocalypseConfig GetInstance() => ModContent.GetInstance<ZombieApocalypseConfig>();
 

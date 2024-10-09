@@ -1,4 +1,4 @@
-This mod adds zombie apocalypse mechanics to Terraria. You may choose whether or not players are only turned when killed by a zombie, or turn if they're killed by anything.
+This mod adds zombie apocalypse mechanics to Terraria.
 
 By default, a player will become a zombie if they're killed by anything, however you can change this in the config to make it so that players will only turn into a zombie if they are killed by another zombie.
 
@@ -11,3 +11,14 @@ This mod also ramps up zombie spawns :)
 Recommended to play with friends on a Master mode (hardcore?) world.
 
 Most of this mod is configurable, so take a look at the config if you want to adjust the mod, because you most likely can! :)
+
+Additionally, this mod adds a few new types of zombies to the game:
+* Bucket Zombie - just a zombie with a bucket on its head :)
+* Commando Zombie - a hardmode zombie with a M4A1 Carbine rifle.
+* Zorm - a zombie worm that spawns in the underground and cavern layers.
+* Giant Zorm - a hardmode equivalent of the zorm.
+* Zombified Mummy - a mummy variant that only spawns in deserts at night.
+* Zombunny - a cute little bunny but its a zombie. Spawns in the forest biome during the day.
+* Zombie Bat - a zombified cave bat. Spawns in the cavern layer.
+* Zombie Eye - a zombified demon eye. Spawns on the surface or the sky during the night.
+* Zombie Slime - a zombified slime. Spawns in the forest biome at any time of day.

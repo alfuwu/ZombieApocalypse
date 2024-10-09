@@ -1,11 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
-using System.Collections.Generic;
-using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Graphics.Effects;
 using Terraria.ID;
-using Terraria.ModLoader;
 using ZombieApocalypse.Common.Hooks;
 
 namespace ZombieApocalypse.Common.Extensions;
@@ -50,6 +47,6 @@ public static class PlayerExtensions {
 
     public static bool IsZombifiableDeath(this Player player, PlayerDeathReason deathReason = null) {
         PlayerDeathReason damageSource = deathReason ?? player.GetModPlayer<ZombifiablePlayer>().LastDeathReason;
-        return damageSource != null && player.whoAmI == Main.myPlayer && (!ZombieApocalypseConfig.GetInstance().OnlyTransformPlayerIfKilledByZombie || (damageSource.TryGetCausingNPC(out NPC npc) && NPCID.Sets.Zombies[npc.type]) || (damageSource.TryGetCausingEntity(out Entity entity) && entity is Player p && p.IsZombie()));
+        return damageSource != null && !ZombieApocalypseConfig.GetInstance(out var cfg).DisableZombification && player.whoAmI == Main.myPlayer && (!cfg.OnlyTransformPlayerIfKilledByZombie || (damageSource.TryGetCausingNPC(out NPC npc) && NPCID.Sets.Zombies[npc.type]) || (damageSource.TryGetCausingEntity(out Entity entity) && entity is Player p && p.IsZombie()));
     }
 }
