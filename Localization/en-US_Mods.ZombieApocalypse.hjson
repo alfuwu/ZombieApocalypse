@@ -74,12 +74,12 @@ Configs: {
 		}
 
 		ZombiesCanUseAmmoAndCoinSlots: {
-			Label: Zombies Can Use Ammo And Coin Slots
+			Label: "[i:73] Zombies Can Use Ammo And Coin Slots"
 			Tooltip: Allows zombies to use coin and ammo slots
 		}
 
 		AllowZombiesToUseVoidbags: {
-			Label: Allow Zombies to Use Voidbag
+			Label: "[i:5325] Allow Zombies to Use Voidbag"
 			Tooltip: The voidbag is basically an extra inventory, so you may want to turn off the option for a zombie to use one
 		}
 
@@ -89,17 +89,17 @@ Configs: {
 		}
 
 		EnableHolyCure: {
-			Label: Enable Holy Cure
+			Label: "[i:ZombieApocalypse/HolyCure] Enable Holy Cure"
 			Tooltip: Enables usage & crafting of Holy Cures
 		}
 
 		EnableSuspiciousLookingFlask: {
-			Label: Enable Suspicious Looking Flask
+			Label: "[i:ZombieApocalypse/SuspiciousLookingFlask] Enable Suspicious Looking Flask"
 			Tooltip: Enables usage & crafting of Suspicious Looking Flasks
 		}
 
 		IncreaseZombieArmDropChance: {
-			Label: Increase Zombie Arm Drop Chance
+			Label: "[i:1304] Increase Zombie Arm Drop Chance"
 			Tooltip: Increases the chance for zombies to drop their arms to 5% from 0.4% (note: also decreases the damage of Zombie Arms)
 		}
 
@@ -130,12 +130,12 @@ Configs: {
 
 		ApplyCustomVisionShaderToZombies: {
 			Label: Apply Custom Vision Shader to Zombies
-			Tooltip: Applies a custom vision shader to all zombies
+			Tooltip: Makes the screen tinted green for zombified players
 		}
 
 		ZombifyPlayersOnRespawn: {
 			Label: Zombify Players on Respawn
-			Tooltip: If false, players will immediately become zombies instead of dying
+			Tooltip: If false, players will immediately become zombies instead of dying (must be set to false for hardcore to work properly)
 		}
 
 		RespawnNewZombiesWhereTheyDied: {
