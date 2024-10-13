@@ -27,6 +27,8 @@ public class ZombieEye : ModNPC {
         NPC.lifeMax = 60;
         NPC.value = 75f;
         NPC.knockBackResist = 0.8f;
+        Banner = NPCID.Zombie;
+        BannerItem = ItemID.ZombieBanner;
     }
 
     public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry) {

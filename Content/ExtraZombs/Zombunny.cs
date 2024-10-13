@@ -27,6 +27,8 @@ public class Zombunny : ModNPC {
         NPC.defense = 0;
         NPC.value = 4f;
         NPC.DeathSound = SoundID.NPCDeath1;
+        Banner = NPCID.Zombie;
+        BannerItem = ItemID.ZombieBanner;
     }
 
     public override void AI() {

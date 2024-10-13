@@ -244,7 +244,7 @@ public class PlayerHooks : ModHook {
     // this hook is so scuffed
     // but it seems to work as intended so
     private void OnSpawn_SetPositionAtWorldSpawn(On_Player.orig_Spawn_SetPositionAtWorldSpawn orig, Player self) {
-        if ((ZombieApocalypseConfig.GetInstance(out var cfg).AlwaysRespawnZombiesWhereTheyDied && self.IsZombie() && !cfg.UnzombifyPlayersOnDeath) || (cfg.RespawnNewZombiesWhereTheyDied && !self.IsZombie() && self.IsZombifiableDeath()))
+        if ((ZombieApocalypseConfig.GetInstance(out var cfg).AlwaysRespawnZombiesWhereTheyDied && self.IsZombie() && !cfg.UnzombifyPlayersOnDeath) || ((cfg.RespawnNewZombiesWhereTheyDied || cfg.AlwaysRespawnZombiesWhereTheyDied) && !self.IsZombie() && self.IsZombifiableDeath()))
             DoSpawnThingy(self, self.position.X / 16, self.position.Y / 16);
         else if (cfg.ZombifiedPlayersSpawnAtOceans && (self.IsZombifiableDeath() || self.IsZombie()))
             DoSpawnThingy(self, Main.rand.NextBool() ? Main.maxTilesX - 300 : 300, 0);

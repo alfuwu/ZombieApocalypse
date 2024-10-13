@@ -29,6 +29,8 @@ public class ZormHead : WormHead {
         NPC.lifeMax = 30;
         NPC.value = 40f;
         NPC.knockBackResist = 0f;
+        Banner = NPCID.Zombie;
+        BannerItem = ItemID.ZombieBanner;
     }
 
     public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry) {

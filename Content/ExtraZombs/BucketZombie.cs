@@ -26,6 +26,8 @@ public class BucketZombie : ModNPC {
         NPC.defense = 7;
         NPC.value = 80f;
         NPC.knockBackResist = 0.5f;
+        Banner = NPCID.Zombie;
+        BannerItem = ItemID.ZombieBanner;
     }
 
     public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry) {

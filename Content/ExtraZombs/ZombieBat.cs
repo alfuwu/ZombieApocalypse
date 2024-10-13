@@ -24,6 +24,8 @@ public class ZombieBat : ModNPC {
         NPC.lifeMax = 16;
         NPC.value = 90f;
         NPC.knockBackResist = 0.8f;
+        Banner = NPCID.Zombie;
+        BannerItem = ItemID.ZombieBanner;
     }
 
     public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry) {

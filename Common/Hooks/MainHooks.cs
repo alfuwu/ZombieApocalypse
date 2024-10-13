@@ -3,9 +3,7 @@ using MonoMod.Cil;
 using System;
 using System.Reflection;
 using Terraria;
-using Terraria.IO;
 using Terraria.ModLoader;
-using ZombieApocalypse.Common.Extensions;
 
 namespace ZombieApocalypse.Common.Hooks;
 

@@ -27,6 +27,8 @@ public class ZombifiedMummy : ModNPC {
         NPC.lifeMax = 130;
         NPC.value = 600f;
         NPC.knockBackResist = 0.5f;
+        Banner = NPCID.Zombie;
+        BannerItem = ItemID.ZombieBanner;
     }
 
     public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry) {

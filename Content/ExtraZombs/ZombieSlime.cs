@@ -20,6 +20,8 @@ public class ZombieSlime: ModNPC {
         NPC.lifeMax = 25;
         NPC.value = 25f;
         NPC.knockBackResist = 1f;
+        Banner = NPCID.Zombie;
+        BannerItem = ItemID.ZombieBanner;
     }
 
     public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry) {

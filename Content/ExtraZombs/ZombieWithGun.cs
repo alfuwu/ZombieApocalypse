@@ -32,6 +32,8 @@ public class ZombieWithGun : ModNPC {
         NPC.defense = 18;
         NPC.value = 1000f;
         NPC.knockBackResist = 0.5f;
+        Banner = NPCID.Zombie;
+        BannerItem = ItemID.ZombieBanner;
     }
 
     public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry) {
